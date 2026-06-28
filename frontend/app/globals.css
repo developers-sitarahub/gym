@@ -816,6 +816,7 @@ body {
   height: 100%;
   fill: #0b1020;
   z-index: 10;
+  filter: drop-shadow(-8px 0 12px rgba(0, 0, 0, 0.65));
 }
 
 .tear-edge-right {
@@ -826,6 +827,7 @@ body {
   height: 100%;
   fill: #0b1020;
   z-index: 10;
+  filter: drop-shadow(8px 0 12px rgba(0, 0, 0, 0.65));
 }
 
 /* Jagged divider glow */
@@ -837,5 +839,18 @@ body {
   background: linear-gradient(to bottom, #4f46e5, #ec4899, #10b981);
   box-shadow: 0 0 15px #4f46e5, 0 0 30px #ec4899;
   z-index: 15;
+}
+
+.tear-divider-glow-svg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.8)) drop-shadow(0 0 16px rgba(236, 72, 153, 0.6));
 }
 

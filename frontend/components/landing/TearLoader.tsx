@@ -16,110 +16,114 @@ export default function TearLoader() {
       }
     }
 
-    // Prevent body scroll during load
+    // Prevent scrolling during active load
     document.body.style.overflow = 'hidden';
-    const timer = setTimeout(() => {
-      setLoading(false);
-      document.body.style.overflow = '';
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('fitflow_tear_loader_played', 'true');
-      }
-    }, 1500); // Loader plays for 1.5s total
+
+    let exitTimeout: NodeJS.Timeout;
+
+    const handlePageLoadComplete = () => {
+      // Small buffer delay to appreciate the smooth entry animation
+      exitTimeout = setTimeout(() => {
+        setLoading(false);
+        document.body.style.overflow = '';
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('fitflow_tear_loader_played', 'true');
+        }
+      }, 1200);
+    };
+
+    // Fallback load release
+    const fallbackTimer = setTimeout(handlePageLoadComplete, 3500);
+
+    if (document.readyState === 'complete') {
+      handlePageLoadComplete();
+    } else {
+      window.addEventListener('load', handlePageLoadComplete);
+    }
 
     return () => {
       document.body.style.overflow = '';
-      clearTimeout(timer);
+      window.removeEventListener('load', handlePageLoadComplete);
+      clearTimeout(fallbackTimer);
+      if (exitTimeout) clearTimeout(exitTimeout);
     };
   }, []);
-
-  // Zigzag path coordinates for a realistic torn paper seam
-  // ViewBox: 0 0 100 1000
-  const leftTearPath = "M0,0 L70,30 L30,80 L80,130 L40,180 L90,230 L50,280 L85,330 L45,380 L80,430 L40,480 L90,530 L50,580 L80,630 L30,680 L75,730 L40,780 L85,830 L45,880 L90,930 L50,1000 L0,1000 Z";
-  const rightTearPath = "M100,0 L70,30 L30,80 L80,130 L40,180 L90,230 L50,280 L85,330 L45,380 L80,430 L40,480 L90,530 L50,580 L80,630 L30,680 L75,730 L40,780 L85,830 L45,880 L90,930 L50,1000 L100,1000 Z";
 
   return (
     <AnimatePresence>
       {loading && (
-        <div className="tear-loader-overlay">
-          {/* LEFT PANEL */}
-          <motion.div
-            initial={{ x: 0 }}
-            exit={{ 
-              x: '-100%',
-              transition: { duration: 0.95, ease: [0.76, 0, 0.24, 1], delay: 0.2 } 
-            }}
-            className="tear-loader-panel justify-end text-right pr-4"
-          >
-            {/* Torn Edge overlay SVG */}
-            <svg 
-              className="tear-edge-left" 
-              viewBox="0 0 100 1000" 
-              preserveAspectRatio="none"
-            >
-              <path d={leftTearPath} />
-            </svg>
+        <motion.div
+          initial={{ opacity: 1 }}
+          exit={{ 
+            opacity: 0,
+            clipPath: 'circle(0% at 50% 50%)',
+            transition: { duration: 0.95, ease: [0.76, 0, 0.24, 1] }
+          }}
+          className="fixed inset-0 z-[9999] bg-zinc-950 flex flex-col items-center justify-center overflow-hidden"
+          style={{ clipPath: 'circle(100% at 50% 50%)' }}
+        >
+          {/* Radial ambient glow in center */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.08)_0%,transparent_60%)] pointer-events-none" />
 
-            {/* Left Brand Text (Splits on reveal) */}
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -50, transition: { duration: 0.5 } }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="flex items-center gap-2 select-none"
-            >
-              <div className="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white border-2 border-indigo-400">
-                <Dumbbell className="h-6 w-6" />
-              </div>
-              <span className="text-3xl font-extrabold tracking-tight text-white">
-                Fit
-              </span>
-            </motion.div>
-          </motion.div>
+          {/* Core loader branding card */}
+          <div className="relative flex flex-col items-center gap-6 z-10">
+            
+            {/* Double ring rotating status spinner */}
+            <div className="relative flex items-center justify-center w-28 h-28">
+              {/* Outer ring - Indigo/Pink */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1.6, ease: "linear" }}
+                className="absolute inset-0 rounded-full border border-t-indigo-500 border-r-pink-500 border-b-transparent border-l-transparent"
+              />
+              {/* Inner ring - Cyan/Emerald */}
+              <motion.div
+                animate={{ rotate: -360 }}
+                transition={{ repeat: Infinity, duration: 2.2, ease: "linear" }}
+                className="absolute inset-2.5 rounded-full border border-t-transparent border-r-transparent border-b-emerald-400 border-l-cyan-400 opacity-70"
+              />
+              
+              {/* Inner Central Pulsing Dumbbell Container */}
+              <motion.div 
+                animate={{ 
+                  scale: [1, 1.04, 1],
+                  boxShadow: [
+                    '0 0 15px rgba(99,102,241,0.2)',
+                    '0 0 25px rgba(99,102,241,0.45)',
+                    '0 0 15px rgba(99,102,241,0.2)'
+                  ]
+                }}
+                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                className="w-18 h-18 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white border border-indigo-400/25 shadow-lg shadow-black/80"
+              >
+                <Dumbbell className="h-8 w-8 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.4)]" />
+              </motion.div>
+            </div>
 
-          {/* CENTRAL GLOW SEAM */}
-          <motion.div 
-            initial={{ scaleY: 0, opacity: 0.5 }}
-            animate={{ scaleY: 1, opacity: 1 }}
-            exit={{ 
-              scaleY: 0, 
-              opacity: 0,
-              transition: { duration: 0.8, ease: 'easeInOut' }
-            }}
-            className="tear-divider-glow left-1/2 -translate-x-1/2" 
-          />
-
-          {/* RIGHT PANEL */}
-          <motion.div
-            initial={{ x: 0 }}
-            exit={{ 
-              x: '100%',
-              transition: { duration: 0.95, ease: [0.76, 0, 0.24, 1], delay: 0.2 } 
-            }}
-            className="tear-loader-panel justify-start pl-4"
-          >
-            {/* Torn Edge overlay SVG */}
-            <svg 
-              className="tear-edge-right" 
-              viewBox="0 0 100 1000" 
-              preserveAspectRatio="none"
-            >
-              <path d={rightTearPath} />
-            </svg>
-
-            {/* Right Brand Text (Splits on reveal) */}
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: 50, transition: { duration: 0.5 } }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="select-none"
-            >
-              <span className="text-3xl font-extrabold tracking-tight text-indigo-400">
-                Flow
-              </span>
-            </motion.div>
-          </motion.div>
-        </div>
+            {/* Typography brand labels */}
+            <div className="flex flex-col items-center text-center">
+              <motion.h1 
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className="text-3xl font-black tracking-tight text-white flex items-center gap-1 select-none"
+              >
+                <span>Fit</span>
+                <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Flow</span>
+              </motion.h1>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="text-[10px] font-bold uppercase tracking-[0.28em] text-zinc-400 mt-2 select-none"
+              >
+                Your Ultimate Gym SaaS
+              </motion.p>
+            </div>
+            
+          </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );

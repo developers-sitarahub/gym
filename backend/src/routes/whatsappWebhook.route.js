@@ -251,8 +251,9 @@ router.post("/", async (req, res) => {
             console.error("❌ Failed to emit WhatsApp WebSocket event:", wsErr.message);
           }
 
-          // Trigger chatbot auto-responder if bot is enabled for member
-          if (member && !member.isBotDisabled && !member.blockedAt) {
+          // Disabled live WhatsApp auto-chatbot responder to prevent loops or rate limit concerns on real phone numbers.
+          // This keeps the live webhook in read-only sync (messages go to Inbox for manual staff reply) while the sandbox simulator remains active.
+          if (false && member && !member.isBotDisabled && !member.blockedAt) {
             try {
               console.log(`🤖 Chatbot active for member "${member.memberName}". Processing...`);
               const botResponse = await handleChatbotMessage(gym, member, text);

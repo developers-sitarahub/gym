@@ -323,9 +323,23 @@ export default function Simulator({ gymId, gymSlug }: SimulatorProps) {
                             href={msg.message.match(/\/payments\/mock-gateway[^\s]+/)?.[0] || ''}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-cyan-600 py-2 text-center text-xs font-bold text-white transition-all hover:bg-cyan-500"
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-cyan-600 py-2 text-center text-xs font-bold text-white transition-all hover:bg-cyan-500 cursor-pointer"
                           >
                             💳 Open Razorpay Checkout
+                          </a>
+                        </div>
+                      ) : msg.message.includes('/receipt/') ? (
+                        <div className="space-y-3">
+                          <p className="whitespace-pre-line">
+                            {msg.message.split('👉')[0].split('http')[0]}
+                          </p>
+                          <a
+                            href={msg.message.match(/\/receipt\/[^\s]+/)?.[0] || ''}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-emerald-600 py-2 text-center text-xs font-bold text-white transition-all hover:bg-emerald-500 cursor-pointer"
+                          >
+                            📄 View Tax Receipt
                           </a>
                         </div>
                       ) : (

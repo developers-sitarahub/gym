@@ -47,9 +47,64 @@ export default function PaymentsPage() {
     }
   };
 
+  const [upiId, setUpiId] = useState('');
+  const [upiName, setUpiName] = useState('');
+  const [razorpayKeyId, setRazorpayKeyId] = useState('');
+  const [razorpayKeySecret, setRazorpayKeySecret] = useState('');
+  const [isRazorpayEnabled, setIsRazorpayEnabled] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch(`/api/dashboard/${gymSlug}/payments/settings`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.settings) {
+          setUpiId(data.settings.upiId || '');
+          setUpiName(data.settings.upiName || '');
+          setRazorpayKeyId(data.settings.razorpayKeyId || '');
+          setRazorpayKeySecret(data.settings.razorpayKeySecret || '');
+          setIsRazorpayEnabled(data.settings.isRazorpayEnabled || false);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchTransactions();
+    fetchSettings();
   }, [gymSlug]);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    try {
+      const res = await fetch(`/api/dashboard/${gymSlug}/payments/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          upiId,
+          upiName,
+          razorpayKeyId,
+          razorpayKeySecret,
+          isRazorpayEnabled,
+        }),
+      });
+      if (res.ok) {
+        alert('Payment settings saved successfully!');
+        setShowSettings(false);
+        await fetchSettings();
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save settings.');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
 
   const handleApprove = async (txnId: string) => {
     if (!confirm('Confirm payment approval? This will activate the membership immediately.')) return;
@@ -103,13 +158,117 @@ export default function PaymentsPage() {
           <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Payments Portal</h2>
           <p className="text-xs text-zinc-500 mt-1">Approve manual UPI references, view invoices, and track payment pipelines.</p>
         </div>
-        <button
-          onClick={fetchTransactions}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-800"
-        >
-          <RefreshCw className="h-4 w-4" /> Refresh Grid
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+          >
+            <CreditCard className="h-4 w-4 text-cyan-400" /> Gateway Settings
+          </button>
+          <button
+            onClick={fetchTransactions}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 cursor-pointer"
+          >
+            <RefreshCw className="h-4 w-4" /> Refresh Grid
+          </button>
+        </div>
       </div>
+
+      {/* Payment Settings Card */}
+      {showSettings && (
+        <form onSubmit={handleSaveSettings} className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 backdrop-blur-md space-y-6">
+          <div className="border-b border-zinc-800 pb-3">
+            <h3 className="text-sm font-bold tracking-tight text-white uppercase tracking-wider flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-cyan-400" /> Payment Integration Settings
+            </h3>
+            <p className="text-[10px] text-zinc-500 mt-1">Configure your merchant accounts. Razorpay handles credit/debit/netbanking/GPay; UPI ID enables direct scans.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-zinc-300">
+            {/* Direct UPI */}
+            <div className="space-y-4 rounded-xl border border-zinc-900 bg-zinc-900/10 p-4">
+              <h4 className="font-bold text-cyan-400 uppercase tracking-widest text-[10px]">Direct UPI configuration</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block font-semibold text-zinc-400 mb-1.5">UPI ID (VPA)</label>
+                  <input
+                    type="text"
+                    value={upiId}
+                    onChange={(e) => setUpiId(e.target.value)}
+                    placeholder="gymname@okaxis"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-zinc-400 mb-1.5">Merchant/Payee Name</label>
+                  <input
+                    type="text"
+                    value={upiName}
+                    onChange={(e) => setUpiName(e.target.value)}
+                    placeholder="Iron Gym & Fitness"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Razorpay Gateway */}
+            <div className="space-y-4 rounded-xl border border-zinc-900 bg-zinc-900/10 p-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-cyan-400 uppercase tracking-widest text-[10px]">Razorpay Payment Gateway</h4>
+                <div className="flex items-center gap-2">
+                  <label className="font-semibold text-zinc-400">Enabled</label>
+                  <input
+                    type="checkbox"
+                    checked={isRazorpayEnabled}
+                    onChange={(e) => setIsRazorpayEnabled(e.target.checked)}
+                    className="h-4 w-4 rounded border-zinc-800 bg-zinc-900 text-cyan-600 focus:ring-cyan-500 accent-cyan-500"
+                  />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block font-semibold text-zinc-400 mb-1.5">Razorpay Key ID</label>
+                  <input
+                    type="text"
+                    value={razorpayKeyId}
+                    onChange={(e) => setRazorpayKeyId(e.target.value)}
+                    placeholder="rzp_test_xxxxxx"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-zinc-400 mb-1.5">Razorpay Secret Key</label>
+                  <input
+                    type="password"
+                    value={razorpayKeySecret}
+                    onChange={(e) => setRazorpayKeySecret(e.target.value)}
+                    placeholder="••••••••••••••••"
+                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3 justify-end text-xs">
+            <button
+              type="button"
+              onClick={() => setShowSettings(false)}
+              className="rounded-xl border border-zinc-800 hover:bg-zinc-900 px-5 py-2 text-zinc-400 font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSavingSettings}
+              className="rounded-xl bg-cyan-600 hover:bg-cyan-500 px-6 py-2 text-white font-bold transition-all disabled:opacity-50 cursor-pointer"
+            >
+              {isSavingSettings ? 'Saving Settings...' : 'Save Configuration'}
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Manual UPI Approvals Panel */}
       <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 backdrop-blur-md">

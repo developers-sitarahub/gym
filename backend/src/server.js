@@ -13,6 +13,9 @@ import whatsappTemplatesRouter from "./routes/whatsappTemplates.route.js";
 import inboxRouter from "./routes/inbox.route.js";
 import membersRouter from "./routes/members.route.js";
 import plansRouter from "./routes/plans.route.js";
+import paymentsRouter from "./routes/payments.route.js";
+import chatbotRouter from "./routes/chatbot.route.js";
+import razorpayRouter from "./routes/razorpay.route.js";
 import { authenticateToken, scopeToGym } from "./middleware/auth.js";
 
 
@@ -58,6 +61,61 @@ app.use("/api/dashboard/:gymSlug/whatsapp", authenticateToken, scopeToGym, whats
 app.use("/api/dashboard/:gymSlug/inbox", authenticateToken, scopeToGym, inboxRouter);
 app.use("/api/dashboard/:gymSlug/members", authenticateToken, scopeToGym, membersRouter);
 app.use("/api/dashboard/:gymSlug/plans", authenticateToken, scopeToGym, plansRouter);
+app.use("/api/dashboard/:gymSlug/payments", authenticateToken, scopeToGym, paymentsRouter);
+app.use("/api/dashboard/:gymSlug/chatbot", authenticateToken, scopeToGym, chatbotRouter);
+app.use("/api/webhook/razorpay", razorpayRouter);
+app.get("/api/receipt/:transactionId", async (req, res) => {
+  const { transactionId } = req.params;
+  try {
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: transactionId },
+      include: {
+        gym: true,
+        member: true,
+        plan: true,
+        invoice: true,
+      },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ error: "Receipt transaction not found" });
+    }
+
+    res.json({
+      transaction: {
+        id: transaction.id,
+        amount: transaction.amount,
+        status: transaction.status,
+        paymentMode: transaction.paymentMode,
+        referenceId: transaction.referenceId,
+        createdAt: transaction.createdAt,
+        member: {
+          name: transaction.member.memberName,
+          phone: transaction.member.phone,
+          email: transaction.member.email,
+        },
+        plan: {
+          name: transaction.plan.name,
+          durationDays: transaction.plan.durationDays,
+        },
+        gym: {
+          name: transaction.gym.name,
+          slug: transaction.gym.slug,
+          address: transaction.gym.address,
+        },
+        invoice: transaction.invoice
+          ? {
+              invoiceNumber: transaction.invoice.invoiceNumber,
+              createdAt: transaction.invoice.createdAt,
+            }
+          : null,
+      },
+    });
+  } catch (err) {
+    console.error("❌ [Receipt API] Error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 app.use("/uploads", express.static("uploads"));
 app.use("/webhook", whatsappWebhookRouter);
 

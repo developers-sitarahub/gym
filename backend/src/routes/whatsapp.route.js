@@ -5,6 +5,8 @@ import { requireRoles } from "../middleware/requireRole.middleware.js";
 import { encrypt, decrypt } from "../utils/encryption.js";
 import multer from "multer";
 import { uploadTemplateMediaToMeta } from "../utils/uploadTemplateMediaToMeta.js";
+import { handleChatbotMessage } from "../utils/chatbotHelper.js";
+import { getIO } from "../socket.js";
 
 const router = Router({ mergeParams: true });
 
@@ -1096,6 +1098,139 @@ router.post(
     } catch (err) {
       console.error("❌ [Update Business Profile] Error:", err);
       res.status(500).json({ error: "Failed to update business profile" });
+    }
+  }
+);
+
+/**
+ * =====================================
+ * SIMULATE INBOUND WHATSAPP MESSAGE
+ * =====================================
+ */
+router.post(
+  "/simulate",
+  async (req, res) => {
+    const { gymSlug } = req.params;
+    const { phone, message } = req.body;
+
+    if (!phone || !message) {
+      return res.status(400).json({ error: "Phone and message are required" });
+    }
+
+    try {
+      const gym = await prisma.gym.findUnique({
+        where: { slug: gymSlug.toLowerCase() },
+      });
+
+      if (!gym) {
+        return res.status(404).json({ error: "Gym not found" });
+      }
+
+      const member = await prisma.member.findFirst({
+        where: {
+          gymId: gym.id,
+          phone: phone,
+        },
+      });
+
+      if (!member) {
+        return res.status(404).json({ error: "Member not found" });
+      }
+
+      const msgId = `sim-${Date.now()}`;
+
+      // 1. Log inbound message in Notification table (for Simulator UI)
+      await prisma.notification.create({
+        data: {
+          gymId: gym.id,
+          memberId: member.id,
+          recipientPhone: phone,
+          title: "Inbound Simulator Message",
+          message: message,
+          type: "INBOUND",
+          status: "SENT",
+        },
+      });
+
+      // 2. Log inbound message in WhatsAppMessages table (for Inbox Live Chat UI)
+      await prisma.whatsAppMessage.create({
+        data: {
+          gymId: gym.id,
+          messageId: msgId,
+          senderPhone: phone,
+          recipientPhone: gym.whatsappDisplayPhoneNumber || "system",
+          text: message,
+          direction: "INBOUND",
+          status: "RECEIVED",
+        },
+      });
+
+      // Emit realtime websocket updates for inbound message
+      try {
+        const io = getIO();
+        io.to(`conversation:${member.id}`).emit("message:new", {
+          id: msgId,
+          whatsappMessageId: msgId,
+          content: message,
+          direction: "inbound",
+          status: "received",
+          createdAt: new Date().toISOString(),
+        });
+        io.to(`gym:${gym.id}`).emit("inbox:update");
+      } catch (wsErr) {}
+
+      // 3. Trigger chatbot auto-responder if bot is active
+      if (!member.isBotDisabled && !member.blockedAt) {
+        console.log(`🤖 [Simulator] Chatbot resolving for member "${member.memberName}": "${message}"`);
+        const botResponse = await handleChatbotMessage(gym, member, message);
+
+        const replyId = `sim-reply-${Date.now()}`;
+
+        // Save bot response to Notification table
+        await prisma.notification.create({
+          data: {
+            gymId: gym.id,
+            memberId: member.id,
+            recipientPhone: phone,
+            title: "Chatbot Simulator Reply",
+            message: botResponse.text,
+            type: "CHATBOT",
+            status: "SENT",
+          },
+        });
+
+        // Save bot response to WhatsAppMessages table
+        await prisma.whatsAppMessage.create({
+          data: {
+            gymId: gym.id,
+            messageId: replyId,
+            senderPhone: gym.whatsappDisplayPhoneNumber || "system",
+            recipientPhone: phone,
+            text: botResponse.text,
+            direction: "OUTBOUND",
+            status: "SENT",
+          },
+        });
+
+        // Emit realtime websocket updates for chatbot reply
+        try {
+          const io = getIO();
+          io.to(`conversation:${member.id}`).emit("message:new", {
+            id: replyId,
+            whatsappMessageId: replyId,
+            content: botResponse.text,
+            direction: "outbound",
+            status: "sent",
+            createdAt: new Date().toISOString(),
+          });
+          io.to(`gym:${gym.id}`).emit("inbox:update");
+        } catch (wsErr) {}
+      }
+
+      res.json({ success: true });
+    } catch (err) {
+      console.error("❌ [Simulator POST] Error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   }
 );

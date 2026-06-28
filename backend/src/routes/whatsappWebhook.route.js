@@ -1,6 +1,8 @@
 import { Router } from "express";
 import prisma from "../prisma.js";
 import { getIO } from "../socket.js";
+import { handleChatbotMessage } from "../utils/chatbotHelper.js";
+import { decrypt } from "../utils/encryption.js";
 
 const router = Router();
 
@@ -247,6 +249,77 @@ router.post("/", async (req, res) => {
             io.to(`gym:${gym.id}`).emit("inbox:update");
           } catch (wsErr) {
             console.error("❌ Failed to emit WhatsApp WebSocket event:", wsErr.message);
+          }
+
+          // Trigger chatbot auto-responder if bot is enabled for member
+          if (member && !member.isBotDisabled && !member.blockedAt) {
+            try {
+              console.log(`🤖 Chatbot active for member "${member.memberName}". Processing...`);
+              const botResponse = await handleChatbotMessage(gym, member, text);
+              
+              if (gym.whatsapp_connected && gym.whatsapp_access_token && gym.whatsapp_phone_number_id) {
+                const base = process.env.META_GRAPH_BASE_URL || "https://graph.facebook.com";
+                const version = process.env.META_API_VERSION || "v25.0";
+                const accessToken = decrypt(gym.whatsapp_access_token);
+                
+                const response = await fetch(
+                  `${base}/${version}/${gym.whatsapp_phone_number_id}/messages`,
+                  {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${accessToken}`,
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      messaging_product: "whatsapp",
+                      recipient_type: "individual",
+                      to: member.phone,
+                      type: "text",
+                      text: { body: botResponse.text }
+                    })
+                  }
+                );
+
+                const resData = await response.json();
+                if (response.ok) {
+                  const replyMsgId = resData.messages?.[0]?.id || `bot-${Date.now()}`;
+                  
+                  const outMessage = await prisma.whatsAppMessage.create({
+                    data: {
+                      gymId: gym.id,
+                      messageId: replyMsgId,
+                      senderPhone: gym.whatsappDisplayPhoneNumber || "system",
+                      recipientPhone: member.phone,
+                      text: botResponse.text,
+                      direction: "OUTBOUND",
+                      status: "SENT"
+                    }
+                  });
+
+                  try {
+                    const io = getIO();
+                    io.to(`gym:${gym.id}`).emit("whatsapp:message", outMessage);
+                    
+                    const mappedMsg = {
+                      id: outMessage.id,
+                      whatsappMessageId: outMessage.messageId,
+                      content: outMessage.text,
+                      direction: "outbound",
+                      status: "sent",
+                      createdAt: outMessage.createdAt
+                    };
+                    io.to(`conversation:${member.id}`).emit("message:new", mappedMsg);
+                    io.to(`gym:${gym.id}`).emit("inbox:update");
+                  } catch (e) {}
+                } else {
+                  console.error("❌ Meta send chatbot reply failed:", resData);
+                }
+              } else {
+                console.log("ℹ️ Skipping live WhatsApp chatbot dispatch. Integration not connected.");
+              }
+            } catch (chatbotErr) {
+              console.error("❌ Error in chatbot handler:", chatbotErr);
+            }
           }
         } else {
           console.log(`ℹ️ Duplicate message detected (ID: ${messageId}), skipping database insert.`);

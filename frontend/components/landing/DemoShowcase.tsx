@@ -232,6 +232,89 @@ function WhatsAppBotDemo({ isMobile }: DemoProps) {
     return () => timers.forEach(clearTimeout);
   }, []);
 
+  if (!isMobile) {
+    // Desktop View: Render as a gorgeous split WhatsApp Web mockup
+    return (
+      <div className="flex h-full bg-[#efeae2]" style={{ minHeight: 280 }}>
+        {/* Chats Sidebar */}
+        <div className="w-[30%] border-r border-slate-200 bg-white flex flex-col">
+          <div className="p-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+            <span className="text-[10px] font-bold text-slate-700">Chats</span>
+            <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-2 border-b border-slate-100 bg-emerald-50/50 flex items-center gap-2">
+              <div className="h-7 w-7 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[8px] font-bold">🤖</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center">
+                  <p className="text-[9px] font-bold text-slate-800 truncate">FitFlow Gym Bot</p>
+                  <span className="text-[7px] text-slate-400">online</span>
+                </div>
+                <p className="text-[8px] text-emerald-600 truncate">FitFlow Active</p>
+              </div>
+            </div>
+            {/* Mock Chat Items for Visual Depth */}
+            <div className="p-2 border-b border-slate-100 flex items-center gap-2 opacity-50">
+              <div className="h-7 w-7 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 text-[8px] font-bold">PS</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] font-bold text-slate-800 truncate">Priya Sharma</p>
+                <p className="text-[8px] text-slate-400 truncate">active 2m ago</p>
+              </div>
+            </div>
+            <div className="p-2 border-b border-slate-100 flex items-center gap-2 opacity-50">
+              <div className="h-7 w-7 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 text-[8px] font-bold">RP</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] font-bold text-slate-800 truncate">Raj Patel</p>
+                <p className="text-[8px] text-slate-400 truncate">active 5m ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Message Feed Pane */}
+        <div className="flex-1 flex flex-col bg-[#efeae2]">
+          <div className="bg-slate-50 px-4 py-2 border-b border-slate-100 flex items-center gap-3">
+            <div className="h-7 w-7 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[8px] font-bold">🤖</div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-800">FitFlow Gym Bot</p>
+              <p className="text-[8px] text-emerald-600">online</p>
+            </div>
+          </div>
+          <div className="flex-1 px-4 py-3 space-y-2 overflow-y-auto" style={{ maxHeight: 220 }}>
+            {msgs.slice(0, visibleMsgs).map((m, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className={`flex ${m.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-xl px-3 py-2 text-[10px] leading-relaxed whitespace-pre-line shadow-sm ${
+                    m.type === 'user'
+                      ? 'bg-[#DCF8C6] text-slate-800 rounded-tr-sm'
+                      : 'bg-white text-slate-800 rounded-tl-sm'
+                  }`}
+                >
+                  {m.text}
+                </div>
+              </motion.div>
+            ))}
+            {visibleMsgs < msgs.length && visibleMsgs > 0 && (
+              <div className="flex justify-start">
+                <div className="bg-white rounded-xl rounded-tl-sm px-3 py-2 flex gap-1.5 shadow-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-slate-300 animate-bounce" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-slate-300 animate-bounce [animation-delay:.15s]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-slate-300 animate-bounce [animation-delay:.3s]" />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mobile view chassis content
   return (
     <div className="flex flex-col h-full bg-[#ECE5DD]">
       <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-4 py-3 flex items-center gap-2 text-white">
@@ -244,7 +327,7 @@ function WhatsAppBotDemo({ isMobile }: DemoProps) {
         </div>
         <Phone className="h-3 w-3 text-white/55 ml-auto" />
       </div>
-      <div className="flex-1 px-3 py-3 space-y-2 overflow-y-auto" style={{ minHeight: isMobile ? 380 : 220 }}>
+      <div className="flex-1 px-3 py-3 space-y-2 overflow-y-auto bg-[#ECE5DD]" style={{ minHeight: 380 }}>
         {msgs.slice(0, visibleMsgs).map((m, i) => (
           <motion.div
             key={i}
@@ -574,13 +657,6 @@ export default function DemoShowcase() {
   const activeDemo = demoTabs.find((t) => t.id === activeTab)!;
   const ActiveComponent = activeDemo.component;
 
-  // Auto-switch to Mobile View for WhatsApp chatbot to look organic
-  useEffect(() => {
-    if (activeTab === 'whatsapp') {
-      setIsMobileView(true);
-    }
-  }, [activeTab]);
-
   return (
     <div className="space-y-8">
       {/* Neumorphic Navigation Tabs */}
@@ -637,7 +713,6 @@ export default function DemoShowcase() {
             />
             <button
               onClick={() => setIsMobileView(false)}
-              disabled={activeTab === 'whatsapp'} // WhatsApp is mobile-only for realistic visual demo
               className={`relative z-10 flex-1 flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] font-bold transition-colors border-0 bg-transparent cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                 !isMobileView
                   ? 'text-indigo-600'
@@ -681,29 +756,32 @@ export default function DemoShowcase() {
                 <ActiveComponent isMobile={false} />
               </motion.div>
             ) : (
-              /* MOBILE VIEWPORT FRAME (iPhone 15 Pro Chassis) */
+              /* MOBILE VIEWPORT FRAME (iPhone 15 Pro Chassis with Thin Premium Bezel) */
               <motion.div
                 key="mobile"
                 initial={{ opacity: 0, y: 15, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15, scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 220, damping: 22 }}
-                className="relative w-[280px] sm:w-[310px] bg-slate-900 rounded-[50px] p-3 border-4 border-black shadow-2xl ring-4 ring-slate-800 overflow-hidden select-none"
+                className="relative w-[280px] sm:w-[310px] bg-slate-950 rounded-[44px] p-2.5 border border-slate-800 shadow-2xl overflow-hidden select-none"
               >
+                {/* Thin Bezel Screen Border */}
+                <div className="absolute inset-0 border-[6px] border-slate-950 rounded-[44px] pointer-events-none z-45" />
+
                 {/* Notch / Dynamic Island */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-full z-30 flex items-center justify-between px-3">
-                  <span className="h-1.5 w-1.5 rounded-full bg-slate-800" />
-                  <span className="h-1 w-8 bg-slate-800/80 rounded-full" />
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-4 bg-black rounded-full z-30 flex items-center justify-between px-2.5">
+                  <span className="h-1 w-1 rounded-full bg-slate-900" />
+                  <span className="h-0.5 w-6 bg-slate-900/50 rounded-full" />
                 </div>
                 
                 {/* Screen Content Wrapper */}
-                <div className="bg-white rounded-[38px] overflow-hidden border-2 border-slate-950 relative h-[420px] flex flex-col">
+                <div className="bg-white rounded-[36px] overflow-hidden border border-slate-950 relative h-[420px] flex flex-col">
                   {/* Status Bar */}
                   <div className="bg-white text-slate-800 text-[8px] font-bold px-5 pt-3.5 pb-1 flex justify-between select-none">
                     <span>9:41</span>
                     <div className="flex items-center gap-1">
-                      <span className="h-1.5 w-2 bg-slate-800 rounded-xs" />
-                      <span className="h-1.5 w-1.5 bg-slate-800 rounded-xs" />
+                      <span className="h-1 w-1.5 bg-slate-800 rounded-xs" />
+                      <span className="h-1 w-1 bg-slate-800 rounded-xs" />
                     </div>
                   </div>
 
@@ -713,7 +791,7 @@ export default function DemoShowcase() {
                   </div>
                   
                   {/* Home Indicator Bar */}
-                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-28 h-1 bg-slate-400 rounded-full z-30" />
+                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-0.5 bg-slate-400 rounded-full z-30" />
                 </div>
               </motion.div>
             )}

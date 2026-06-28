@@ -23,6 +23,11 @@ import {
   BarChart3,
   Globe,
   Layers,
+  Sparkles,
+  Heart,
+  Shield,
+  Target,
+  CreditCard,
 } from 'lucide-react';
 
 import ThreeDashboardAnimation from '../components/dashboard/ThreeDashboardAnimation';
@@ -80,6 +85,74 @@ interface ChatMessage {
   message: string;
   time: string;
 }
+
+const timeline = [
+  {
+    year: '2024',
+    title: 'The Idea',
+    desc:
+      'Frustrated by manual member tracking and payment follow-ups at local gyms, the FitFlow concept was born — automate it all via WhatsApp.',
+    icon: Sparkles,
+    color: 'bg-indigo-600',
+  },
+  {
+    year: '2025',
+    title: 'First Bot Goes Live',
+    desc:
+      'Our WhatsApp chatbot launched with 5 pilot gyms in Mumbai. Within weeks, renewal rates jumped 40%. The product-market fit was undeniable.',
+    icon: Bot,
+    color: 'bg-violet-600',
+  },
+  {
+    year: '2025',
+    title: 'UPI & Razorpay Integration',
+    desc:
+      'Automated UPI QR code generation and Razorpay webhooks for instant payment verification. Members could now pay and auto-renew without any staff involvement.',
+    icon: CreditCard,
+    color: 'bg-emerald-600',
+  },
+  {
+    year: '2026',
+    title: '500+ Gyms Onboarded',
+    desc:
+      'FitFlow now powers gym operations across India — from boutique studios to multi-branch chains. Processing lakhs in automated renewals every month.',
+    icon: TrendingUp,
+    color: 'bg-amber-600',
+  },
+];
+
+const values = [
+  {
+    icon: Zap,
+    title: 'Zero Friction',
+    desc: 'No app downloads, no portals. Everything happens inside WhatsApp — where your members already are.',
+  },
+  {
+    icon: Heart,
+    title: 'Built for Gym Owners',
+    desc: 'We obsess over the problems real gym owners face. Every feature is designed to save time and recover revenue.',
+  },
+  {
+    icon: Shield,
+    title: 'Secure & Reliable',
+    desc: 'End-to-end encryption, Razorpay-grade security, and 99.8% uptime SLA. Your data is always safe.',
+  },
+  {
+    icon: Globe,
+    title: 'India-First Design',
+    desc: 'UPI payments, INR pricing, WhatsApp-native. Built ground-up for the Indian fitness market.',
+  },
+  {
+    icon: Users,
+    title: 'Community Driven',
+    desc: 'Our roadmap is shaped by gym owners. Feature requests, feedback, and real-world testing drive every release.',
+  },
+  {
+    icon: Target,
+    title: 'Results Obsessed',
+    desc: "We measure success by one metric: how much revenue we help you recover. If you don't grow, we don't grow.",
+  },
+];
 
 /* ═══════════════════════════════════════════════════════
    MAIN PAGE — PREMIUM LIGHT MODE + NOIR ALWAYS ACTIVE
@@ -611,6 +684,99 @@ export default function LandingPage() {
                   </span>
                   <h3 className="text-xl font-bold text-slate-900 mt-2 mb-3">{s.title}</h3>
                   <p className="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">{s.desc}</p>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TIMELINE (JOURNEY) */}
+      <section id="journey" className="py-24 md:py-28 bg-[#f0f2f5] border-y border-slate-200/80 relative overflow-hidden">
+        <GlowOrb className="top-1/2 left-0 w-[400px] h-[400px] bg-violet-100/40 blur-[100px] -translate-x-1/2 -translate-y-1/2" />
+
+        <div className="relative max-w-4xl mx-auto px-6 z-10">
+          <FadeUp className="text-center mb-20">
+            <span className="inline-flex items-center gap-2 text-xs font-bold text-violet-600 uppercase tracking-widest bg-white border border-slate-200 px-4 py-2 rounded-full shadow-xs">
+              <Sparkles className="h-3.5 w-3.5" /> Our Journey
+            </span>
+            <h2 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
+              From idea to <span className="text-violet-600">500+ gyms</span>
+            </h2>
+          </FadeUp>
+
+          <div className="relative">
+            {/* Vertical timeline line */}
+            <div className="absolute left-8 md:left-1/2 -translate-x-px top-0 bottom-0 w-1 bg-black" />
+
+            <div className="space-y-12">
+              {timeline.map((item, i) => (
+                <FadeUp key={i} delay={i * 0.15}>
+                  <div
+                    className={`relative flex items-start gap-6 md:gap-12 ${
+                      i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                    }`}
+                  >
+                    {/* Timeline dot */}
+                    <div className="absolute left-8 md:left-1/2 -translate-x-1/2 z-10">
+                      <div
+                        className={`h-12 w-12 ${item.color} rounded-2xl flex items-center justify-center text-white border-4 border-black shadow-[3px_3px_0px_#000000]`}
+                      >
+                        <item.icon className="h-5 w-5" />
+                      </div>
+                    </div>
+
+                    {/* Content Card (Brutalist + Neumorphic Neubrutalist Style) */}
+                    <div
+                      className={`ml-20 md:ml-0 ${
+                        i % 2 === 0
+                          ? 'md:w-[calc(50%-40px)] md:text-right'
+                          : 'md:w-[calc(50%-40px)] md:ml-auto'
+                      }`}
+                    >
+                      <div className="feature-card neu-flat p-6 rounded-2xl text-left border-4 border-black shadow-[6px_6px_0px_#000000] inline-block w-full">
+                        <span className="text-xs font-extrabold text-indigo-600 uppercase tracking-widest">
+                          {item.year}
+                        </span>
+                        <h3 className="text-lg font-bold text-slate-900 mt-1 mb-2">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-slate-500 leading-relaxed">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </FadeUp>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CORE VALUES */}
+      <section id="values" className="py-24 md:py-28 bg-[#f0f2f5] border-b border-slate-200/85">
+        <div className="max-w-6xl mx-auto px-6">
+          <FadeUp className="text-center max-w-2xl mx-auto mb-16">
+            <span className="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-widest bg-white border border-slate-200 px-4 py-2 rounded-full shadow-xs">
+              <Heart className="h-3.5 w-3.5 fill-current text-rose-500" /> What We Stand For
+            </span>
+            <h2 className="mt-5 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
+              Our <span className="text-emerald-600">core values</span>
+            </h2>
+          </FadeUp>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {values.map((v, i) => (
+              <FadeUp key={i} delay={i * 0.08}>
+                <div className="feature-card neu-flat rounded-3xl p-6 transition-all duration-300 h-full flex flex-col">
+                  <div
+                    className={`neu-button h-12 w-12 rounded-2xl flex items-center justify-center mb-4 text-emerald-600`}
+                  >
+                    <v.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 mb-2">{v.title}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{v.desc}</p>
                 </div>
               </FadeUp>
             ))}

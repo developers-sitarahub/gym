@@ -42,11 +42,17 @@ router.post("/", async (req, res) => {
   res.sendStatus(200);
 
   try {
-    console.log("📥 Received Webhook Event Raw Body:", JSON.stringify(body, null, 2));
-
     const entry = body.entry?.[0];
     const change = entry?.changes?.[0];
     const value = change?.value;
+    const field = change?.field;
+
+    // Silently ignore other Meta webhook fields (like flows health alerts, template state updates, etc.)
+    if (field && field !== "messages") {
+      return;
+    }
+
+    console.log("📥 Received Webhook Event Raw Body:", JSON.stringify(body, null, 2));
 
     if (!value) {
       console.log("ℹ️ Webhook payload ignored (no 'value' object found).");

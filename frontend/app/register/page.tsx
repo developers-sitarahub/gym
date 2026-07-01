@@ -6,7 +6,6 @@ import { Dumbbell, User, Mail, Lock, Building, ArrowRight } from 'lucide-react';
 
 export default function RegisterPage() {
   const [gymName, setGymName] = useState('');
-  const [gymSlug, setGymSlug] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
@@ -27,7 +26,6 @@ export default function RegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gymName,
-          gymSlug,
           ownerName,
           ownerEmail,
           ownerPassword,
@@ -96,39 +94,20 @@ export default function RegisterPage() {
 
           <form onSubmit={handleRegister} className="space-y-4">
             {/* Gym Info */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Gym Name</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500">
-                    <Building className="h-4 w-4" />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="FitLife Club"
-                    value={gymName}
-                    onChange={(e) => setGymName(e.target.value)}
-                    required
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950/80 py-3 pl-10 pr-4 text-xs text-white placeholder-zinc-600 focus:border-cyan-500 focus:outline-none transition-all duration-200"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Subdomain Slug</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500">
-                    <Building className="h-4 w-4" />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="fitlife"
-                    value={gymSlug}
-                    onChange={(e) => setGymSlug(e.target.value)}
-                    required
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950/80 py-3 pl-10 pr-4 text-xs text-white placeholder-zinc-600 focus:border-cyan-500 focus:outline-none transition-all duration-200"
-                  />
-                </div>
+            <div>
+              <label className="mb-2 block text-xs font-semibold text-zinc-400 uppercase tracking-wider">Gym Name</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500">
+                  <Building className="h-4 w-4" />
+                </span>
+                <input
+                  type="text"
+                  placeholder="FitLife Club"
+                  value={gymName}
+                  onChange={(e) => setGymName(e.target.value)}
+                  required
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950/80 py-3 pl-10 pr-4 text-xs text-white placeholder-zinc-600 focus:border-cyan-500 focus:outline-none transition-all duration-200"
+                />
               </div>
             </div>
 

@@ -15,6 +15,14 @@ ALTER TABLE "ChatbotSettings" ALTER COLUMN "welcomeMessage" SET DEFAULT 'Welcome
 5. Offers';
 
 -- AlterTable
+ALTER TABLE "Member" ADD COLUMN     "memberName" TEXT;
+
+-- Copy data
+UPDATE "Member" SET "memberName" = "name";
+
+-- Ensure not null
+ALTER TABLE "Member" ALTER COLUMN "memberName" SET NOT NULL;
+
+-- Drop old column and add whatsappName
 ALTER TABLE "Member" DROP COLUMN "name",
-ADD COLUMN     "memberName" TEXT NOT NULL,
 ADD COLUMN     "whatsappName" TEXT;

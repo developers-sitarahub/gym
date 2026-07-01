@@ -202,7 +202,7 @@ export default function ChatbotPage() {
 
       {/* WhatsApp Chatbot Simulator - Fully Sandbox Integrated */}
       {gymId && (
-        <div className="border-t border-zinc-900 pt-8">
+        <div className="border-t border-zinc-800 pt-8">
           <div className="mb-6">
             <h3 className="text-xl font-extrabold tracking-tight text-white">Live Simulator Sandbox</h3>
             <p className="text-xs text-zinc-500 mt-1">Test your chatbot updates and dynamic payment flows instantly below!</p>

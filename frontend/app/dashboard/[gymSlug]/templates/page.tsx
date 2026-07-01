@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
@@ -27,7 +26,9 @@ import {
   Flame,
   LayoutGrid,
   List,
-  Filter
+  Filter,
+  CornerUpLeft,
+  Phone
 } from 'lucide-react';
 
 interface TemplateComponent {
@@ -457,12 +458,11 @@ export default function MessageTemplatesPage() {
 
   return (
     <div className="space-y-8 pb-16">
-      <ToastContainer theme="dark" toastClassName="border border-zinc-850 bg-zinc-950 text-white rounded-xl text-xs font-semibold" />
 
       {/* Main Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl flex items-center gap-2">
+          <h2 className="text-2xl font-extrabold tracking-tight text-zinc-100 sm:text-3xl flex items-center gap-2">
             <FileText className="h-7 w-7 text-cyan-400" />
             Message Templates
           </h2>
@@ -505,7 +505,7 @@ export default function MessageTemplatesPage() {
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 flex items-start gap-3 backdrop-blur-md">
           <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="block font-bold text-white text-xs">WhatsApp Integration Not Connected</span>
+            <span className="block font-bold text-zinc-100 text-xs">WhatsApp Integration Not Connected</span>
             <p className="text-[11px] text-zinc-400 leading-relaxed max-w-2xl">
               To submit templates to Meta for approval, you must first connect and verify your WhatsApp Business Account.
             </p>
@@ -534,7 +534,7 @@ export default function MessageTemplatesPage() {
               placeholder="Search templates..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 py-2.5 pl-10 pr-4 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 transition-all"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 py-2.5 pl-10 pr-4 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 transition-all"
             />
           </div>
 
@@ -548,7 +548,7 @@ export default function MessageTemplatesPage() {
                   setIsStatusOpen(!isStatusOpen);
                   setIsCategoryOpen(false);
                 }}
-                className="w-full text-left flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/60 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:text-white transition-all focus:outline-none focus:border-cyan-500"
+                className="w-full text-left flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/60 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:text-zinc-100 transition-all focus:outline-none focus:border-cyan-500"
               >
                 <span>
                   {statusOptions.find((o) => o.value === statusFilter)?.label || 'All Statuses'}
@@ -568,7 +568,7 @@ export default function MessageTemplatesPage() {
                       className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         statusFilter === opt.value
                           ? 'bg-cyan-500/10 text-cyan-400 font-semibold'
-                          : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/60'
                       }`}
                     >
                       {opt.label}
@@ -586,7 +586,7 @@ export default function MessageTemplatesPage() {
                   setIsCategoryOpen(!isCategoryOpen);
                   setIsStatusOpen(false);
                 }}
-                className="w-full text-left flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/60 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:text-white transition-all focus:outline-none focus:border-cyan-500"
+                className="w-full text-left flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900/60 px-4 py-2.5 text-xs font-semibold text-zinc-300 hover:text-zinc-100 transition-all focus:outline-none focus:border-cyan-500"
               >
                 <span>
                   {categoryOptions.find((o) => o.value === categoryFilter)?.label || 'All Categories'}
@@ -606,7 +606,7 @@ export default function MessageTemplatesPage() {
                       className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                         categoryFilter === opt.value
                           ? 'bg-cyan-500/10 text-cyan-400 font-semibold'
-                          : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
+                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/60'
                       }`}
                     >
                       {opt.label}
@@ -618,7 +618,7 @@ export default function MessageTemplatesPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 border-t border-zinc-900 pt-3 md:border-none md:pt-0 shrink-0">
+        <div className="flex items-center gap-2 border-t border-zinc-800 pt-3 md:border-none md:pt-0 shrink-0">
           <span className="text-zinc-500 font-semibold mr-1">View:</span>
           <button
             onClick={() => setViewMode('grid')}
@@ -655,7 +655,7 @@ export default function MessageTemplatesPage() {
             <FileText className="h-6 w-6" />
           </div>
           <div className="space-y-1 max-w-sm">
-            <span className="block font-bold text-white text-sm">No Templates Found</span>
+            <span className="block font-bold text-zinc-100 text-sm">No Templates Found</span>
             <p className="text-xs text-zinc-500 leading-relaxed">
               {searchTerm || statusFilter !== 'ALL' || categoryFilter !== 'ALL'
                 ? 'No templates match your selected filters. Try updating your criteria.'
@@ -688,13 +688,13 @@ export default function MessageTemplatesPage() {
           {filteredTemplates.map((t) => (
             <div
               key={t.id}
-              className="group relative rounded-2xl border border-zinc-900 bg-zinc-950/60 p-5 flex flex-col justify-between backdrop-blur-md"
+              className="group relative rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 flex flex-col justify-between backdrop-blur-md"
             >
               <div className="space-y-4">
                 {/* Template Card Top Bar */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-0.5 overflow-hidden">
-                    <span className="font-extrabold text-sm text-white block truncate tracking-tight">
+                    <span className="font-extrabold text-sm text-zinc-100 block truncate tracking-tight">
                       {t.templateName}
                     </span>
                     <div className="flex flex-wrap gap-1.5 items-center mt-1">
@@ -724,7 +724,7 @@ export default function MessageTemplatesPage() {
               </div>
 
               {/* Template Card Bottom Actions Bar */}
-              <div className="flex items-center justify-between gap-2 border-t border-zinc-900/70 pt-4 mt-5">
+              <div className="flex items-center justify-between gap-2 border-t border-zinc-800/70 pt-4 mt-5">
                 <button
                   onClick={() => setSelectedTemplate(t)}
                   className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 font-bold tracking-tight transition-all"
@@ -746,7 +746,7 @@ export default function MessageTemplatesPage() {
                     <button
                       onClick={() => handleSyncTemplateStatus(t.id)}
                       disabled={actionInProgressId !== null}
-                      className="flex items-center justify-center p-1.5 rounded-lg border border-zinc-850 bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-white transition-all disabled:opacity-50"
+                      className="flex items-center justify-center p-1.5 rounded-lg border border-zinc-850 bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-zinc-100 transition-all disabled:opacity-50"
                       title="Sync Approval Status"
                     >
                       <RefreshCcw className={`h-3.5 w-3.5 ${actionInProgressId === t.id ? 'animate-spin' : ''}`} />
@@ -775,11 +775,11 @@ export default function MessageTemplatesPage() {
         </div>
       ) : (
         /* LIST VIEW MODE */
-        <div className="rounded-2xl border border-zinc-900 bg-zinc-950/60 overflow-hidden backdrop-blur-md">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 overflow-hidden backdrop-blur-md">
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left border-collapse">
               <thead>
-                <tr className="border-b border-zinc-900 bg-zinc-900/30 text-zinc-500 uppercase tracking-widest text-[9px] font-black">
+                <tr className="border-b border-zinc-800 bg-zinc-900/30 text-zinc-500 uppercase tracking-widest text-[9px] font-black">
                   <th className="p-4">Template Name</th>
                   <th className="p-4">Category</th>
                   <th className="p-4">Language</th>
@@ -788,10 +788,10 @@ export default function MessageTemplatesPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-900">
+              <tbody className="divide-y divide-zinc-800">
                 {filteredTemplates.map((t) => (
                   <tr key={t.id} className="hover:bg-zinc-900/20 transition-all text-zinc-300">
-                    <td className="p-4 font-bold text-white">{t.templateName}</td>
+                    <td className="p-4 font-bold text-zinc-100">{t.templateName}</td>
                     <td className="p-4">
                       <span className="rounded bg-zinc-900 border border-zinc-850 px-2 py-0.5 font-semibold uppercase tracking-wider text-[10px]">
                         {t.category}
@@ -835,7 +835,7 @@ export default function MessageTemplatesPage() {
                           <button
                             onClick={() => handleSyncTemplateStatus(t.id)}
                             disabled={actionInProgressId !== null}
-                            className="p-1 border border-zinc-800 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-all disabled:opacity-50"
+                            className="p-1 border border-zinc-800 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-all disabled:opacity-50"
                             title="Sync Status"
                           >
                             <RefreshCcw className={`h-3.5 w-3.5 ${actionInProgressId === t.id ? 'animate-spin' : ''}`} />
@@ -882,16 +882,16 @@ export default function MessageTemplatesPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="relative w-full max-w-xl max-h-[90vh] bg-zinc-950 border border-zinc-900 shadow-2xl rounded-2xl flex flex-col justify-between overflow-hidden pointer-events-auto"
+                className="relative w-full max-w-xl max-h-[90vh] bg-zinc-950 border border-zinc-800 shadow-2xl rounded-2xl flex flex-col justify-between overflow-hidden pointer-events-auto"
               >
                 {/* Decorative glows */}
                 <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
                 <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
 
                 {/* Drawer Header */}
-                <div className="flex items-center justify-between border-b border-zinc-900/60 p-5 relative z-10 bg-zinc-950/40">
+                <div className="flex items-center justify-between border-b border-zinc-800/60 p-5 relative z-10 bg-zinc-950/40">
                   <div>
-                    <h3 className="font-extrabold text-sm text-white flex items-center gap-1.5 uppercase tracking-wide">
+                    <h3 className="font-extrabold text-sm text-zinc-100 flex items-center gap-1.5 uppercase tracking-wide">
                       <Eye className="h-4 w-4 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
                       Template Preview
                     </h3>
@@ -899,7 +899,7 @@ export default function MessageTemplatesPage() {
                   </div>
                   <button
                     onClick={() => setSelectedTemplate(null)}
-                    className="rounded-lg p-1.5 hover:bg-zinc-900 text-zinc-400 hover:text-white transition-all"
+                    className="rounded-lg p-1.5 hover:bg-zinc-900 text-zinc-400 hover:text-zinc-100 transition-all"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -909,22 +909,22 @@ export default function MessageTemplatesPage() {
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 relative z-10">
                   {/* Meta details cards */}
                   <div className="grid grid-cols-4 gap-2.5">
-                    <div className="bg-zinc-900/40 border border-zinc-900 hover:border-zinc-800/80 rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300">
+                    <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-800/80 rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300">
                       <span className="text-zinc-500 text-[9px] uppercase tracking-wider font-semibold">Approval Status</span>
                       {getStatusBadge(selectedTemplate.status)}
                     </div>
                     
-                    <div className="bg-zinc-900/40 border border-zinc-900 hover:border-zinc-800/80 rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300">
+                    <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-800/80 rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300">
                       <span className="text-zinc-500 text-[9px] uppercase tracking-wider font-semibold">Template Category</span>
                       <span className="font-bold text-zinc-100 mt-1 block uppercase text-[10px] truncate" title={selectedTemplate.category}>{selectedTemplate.category}</span>
                     </div>
                     
-                    <div className="bg-zinc-900/40 border border-zinc-900 hover:border-zinc-800/80 rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300">
+                    <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-800/80 rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300">
                       <span className="text-zinc-500 text-[9px] uppercase tracking-wider font-semibold">Language Code</span>
                       <span className="font-bold text-zinc-300 mt-1 block uppercase text-[10px] truncate" title={selectedTemplate.language}>{selectedTemplate.language}</span>
                     </div>
                     
-                    <div className="bg-zinc-900/40 border border-zinc-900 hover:border-zinc-800/80 rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300">
+                    <div className="bg-zinc-900/40 border border-zinc-800 hover:border-zinc-800/80 rounded-xl p-2.5 flex flex-col justify-between transition-all duration-300">
                       <span className="text-zinc-500 text-[9px] uppercase tracking-wider font-semibold">Meta ID</span>
                       <span className="font-mono text-zinc-400 mt-1 block truncate text-[10px]" title={selectedTemplate.metaTemplateId || 'N/A'}>
                         {selectedTemplate.metaTemplateId || 'Not registered'}
@@ -940,124 +940,166 @@ export default function MessageTemplatesPage() {
                     </div>
 
                     {/* Smartphone Frame Mockup Wrapper */}
-                    <div className="relative mx-auto w-[290px] h-[520px] rounded-[38px] border-[10px] border-zinc-800 bg-wa-chat-bg shadow-2xl overflow-hidden flex flex-col justify-between font-sans select-none ring-1 ring-zinc-700/50">
-                      {/* Speaker Notch / Dynamic Island */}
-                      <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-24 h-4.5 bg-zinc-850 rounded-full z-30 flex items-center justify-center border border-zinc-800/40">
-                        <div className="w-1.5 h-1.5 bg-zinc-900 rounded-full ml-1.5" />
-                        <div className="w-8 h-1 bg-zinc-800/60 rounded-full ml-3" />
-                      </div>
-
-                      {/* Camera Lens Indicator */}
-                      <div className="absolute top-2.5 right-6 w-2 h-2 bg-zinc-900 rounded-full z-30" />
+                    <div className="relative mx-auto w-[290px] h-[520px] rounded-[44px] border-[6px] border-black bg-wa-chat-bg shadow-2xl overflow-hidden flex flex-col justify-between font-sans select-none ring-2 ring-zinc-800">
+                      {/* iPhone Notch */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-4.5 bg-black rounded-b-xl z-30" />
 
                       {/* Screen Content Wrapper */}
-                      <div className="flex-1 flex flex-col justify-between overflow-hidden relative pt-7 pb-4">
-                        {/* WhatsApp Header Mockup */}
-                        <div className="bg-zinc-900 px-3.5 py-2.5 flex items-center justify-between border-b border-zinc-800 shrink-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-zinc-400 text-xs cursor-pointer select-none">←</span>
-                            <div className="w-6.5 h-6.5 rounded-full bg-cyan-600 flex items-center justify-center text-white font-extrabold text-[10px]">
-                              <FileText className="w-3.5 h-3.5 text-white" />
-                            </div>
-                            <div>
-                              <span className="block text-[10px] font-bold text-zinc-100 leading-tight">Gym Member</span>
-                              <span className="block text-[8px] text-emerald-400 leading-tight font-semibold">online</span>
+                      <div className="flex-1 flex flex-col justify-between overflow-hidden relative pt-0 pb-1.5">
+                        <div className="flex flex-col shrink-0">
+                          {/* Status Bar */}
+                          <div className="h-6 bg-zinc-900 px-5 pt-1.5 flex items-center justify-between text-white text-[9px] font-medium z-20 select-none">
+                            <span>10:37</span>
+                            <div className="flex items-center gap-1.5">
+                              <svg className="w-2 h-2 fill-current opacity-60" viewBox="0 0 24 24">
+                                <path d="M2 22h20V2z"/>
+                              </svg>
+                              <svg className="w-2.2 h-2.2 fill-current opacity-60" viewBox="0 0 24 24">
+                                <path d="M12 21l-12-12c4.4-4.4 11.6-4.4 16 0z"/>
+                              </svg>
+                              <div className="w-3 h-1.8 border border-white/60 rounded-[2.5px] p-[0.5px] flex items-center">
+                                <div className="w-full h-full bg-white/60 rounded-[0.5px]" />
+                              </div>
                             </div>
                           </div>
-                          <div className="flex gap-2 text-zinc-400 text-[9px] select-none">
-                            <span>📞</span>
-                            <span>⋮</span>
+
+                          {/* WhatsApp Header Mockup */}
+                          <div className="bg-zinc-900 px-3.5 py-2.5 flex items-center justify-between text-white border-b border-zinc-800 shrink-0 shadow-sm relative z-10">
+                            <div className="flex items-center gap-2">
+                              <span className="text-zinc-400 text-xs cursor-pointer select-none">←</span>
+                              <div className="w-6.5 h-6.5 rounded-full bg-cyan-600 flex items-center justify-center text-white font-extrabold text-[10px]">
+                                <FileText className="w-3.5 h-3.5 text-white" />
+                              </div>
+                              <div>
+                                <span className="block text-[10px] font-bold text-zinc-100 leading-tight">Gym Member</span>
+                                <span className="block text-[8px] text-emerald-400 leading-tight font-semibold">online</span>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 text-zinc-400 text-[9px] select-none">
+                              <span>📞</span>
+                              <span>⋮</span>
+                            </div>
                           </div>
                         </div>
 
                         {/* Chat Area Mockup */}
                         <div className="flex-1 p-3.5 space-y-3 relative bg-wa-chat-bg overflow-y-auto flex flex-col justify-end">
-                          {/* Background WhatsApp Doodle grid effect */}
-                          <div className="absolute inset-0 opacity-[0.05] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:10px_10px] pointer-events-none" />
-
-                          {/* Chat Message Bubble (Outgoing) */}
-                          <div className="relative self-end bg-bubble-outbound-bg text-bubble-outbound-text p-2.5 rounded-lg rounded-tr-none max-w-[90%] shadow-md border border-bubble-outbound-bg z-10 flex flex-col text-[10px] leading-relaxed">
-                            {/* Header element */}
-                            {getComponentOf(selectedTemplate.components, 'HEADER')?.format === 'TEXT' && (
-                              <div className="font-bold text-bubble-outbound-text text-[10px] border-b border-bubble-outbound-meta/20 pb-1 mb-1.5">
-                                {getComponentOf(selectedTemplate.components, 'HEADER')?.text}
-                              </div>
-                            )}
+                          {/* Background WhatsApp Doodle image effect */}
+                          <div className="absolute inset-0 bg-[url('/chat-bg.png')] bg-repeat bg-center opacity-30 dark:opacity-[0.5] pointer-events-none" />
+                          {/* Chat Message Bubble (Outbound) Wrapper */}
+                          <div className="relative self-end w-fit max-w-[92%] z-10 flex flex-col">
+                            {/* WhatsApp Chat Bubble Tail (right side) */}
+                            <div className="absolute top-0 -right-1.5 w-0 h-0 border-t-[8px] border-t-bubble-outbound-bg border-r-[8px] border-r-transparent" />
+                            
+                            {/* Inner Bubble Container */}
+                            <div className="bg-bubble-outbound-bg text-bubble-outbound-text rounded-lg rounded-tr-none shadow-sm border border-bubble-outbound-bg overflow-hidden flex flex-col text-xs leading-relaxed">
+                            
+                            {/* Header element (Full Width Media) */}
                             {getComponentOf(selectedTemplate.components, 'HEADER')?.format === 'IMAGE' && 
-                             getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename ? (
-                              <div className="rounded-lg overflow-hidden border border-bubble-outbound-meta/10 mb-1 max-h-[140px] relative">
+                             (getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename ||
+                              getComponentOf(selectedTemplate.components, 'HEADER')?.example?.header_handle?.[0]) ? (
+                              <div className="w-full overflow-hidden border-b border-wa-chat-divider max-h-[140px] relative">
                                 <img
-                                  src={`/uploads/templates/${getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename}`}
+                                  src={getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename
+                                    ? `/uploads/templates/${getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename}`
+                                    : getComponentOf(selectedTemplate.components, 'HEADER')?.example?.header_handle?.[0]}
                                   alt="Header Image Preview"
                                   className="w-full h-auto max-h-[140px] object-cover"
                                 />
-                                <div className="absolute bottom-1 right-1 bg-black/50 px-1 py-0.5 rounded text-[6px] text-white">
-                                  IMAGE
-                                </div>
                               </div>
                             ) : getComponentOf(selectedTemplate.components, 'HEADER')?.format === 'VIDEO' && 
-                             getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename ? (
-                              <div className="rounded-lg overflow-hidden border border-bubble-outbound-meta/10 mb-1 max-h-[140px] relative font-sans">
+                             (getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename ||
+                              getComponentOf(selectedTemplate.components, 'HEADER')?.example?.header_handle?.[0]) ? (
+                              <div className="w-full overflow-hidden border-b border-wa-chat-divider max-h-[140px] relative font-sans">
                                 <video
-                                  src={`/uploads/templates/${getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename}`}
+                                  src={getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename
+                                    ? `/uploads/templates/${getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_filename}`
+                                    : getComponentOf(selectedTemplate.components, 'HEADER')?.example?.header_handle?.[0]}
                                   className="w-full h-auto max-h-[140px] object-cover"
                                   controls
                                 />
                               </div>
                             ) : ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(getComponentOf(selectedTemplate.components, 'HEADER')?.format || '') && (
-                              <div className="rounded-lg bg-black/10 border border-bubble-outbound-meta/10 p-3 text-center text-[9px] text-bubble-outbound-text flex flex-col items-center justify-center gap-1 mb-1">
-                                <Upload className="h-3.5 w-3.5 text-cyan-400" />
+                              <div className="bg-black/10 border-b border-wa-chat-divider p-4 text-center text-[10px] text-bubble-outbound-text flex flex-col items-center justify-center gap-1">
+                                <Upload className="h-5 w-5 text-cyan-500" />
                                 <span className="font-bold">{getComponentOf(selectedTemplate.components, 'HEADER')?.format}</span>
-                                <span className="text-[7px] text-bubble-outbound-meta truncate max-w-[120px]">
+                                <span className="text-[8px] text-bubble-outbound-meta truncate max-w-[150px]">
                                   {getComponentOf(selectedTemplate.components, 'HEADER')?.example?.local_originalname || 'draft-file'}
                                 </span>
                               </div>
                             )}
 
-                            {/* Body element */}
-                            <div className="whitespace-pre-wrap leading-relaxed text-[10px] break-words">
-                              {getComponentOf(selectedTemplate.components, 'BODY')?.text}
+                            {/* Text content with padding */}
+                            <div className="p-3.5 flex flex-col">
+                              {getComponentOf(selectedTemplate.components, 'HEADER')?.format === 'TEXT' && (
+                                <div className="font-bold text-bubble-outbound-text text-xs border-b border-wa-chat-divider pb-1.5 mb-2 font-sans">
+                                  {getComponentOf(selectedTemplate.components, 'HEADER')?.text}
+                                </div>
+                              )}
+
+                              {/* Body element */}
+                              <div className="whitespace-pre-wrap leading-relaxed text-xs break-words text-bubble-outbound-text">
+                                {getComponentOf(selectedTemplate.components, 'BODY')?.text}
+                              </div>
+
+                              {/* Footer element */}
+                              {getComponentOf(selectedTemplate.components, 'FOOTER') && (
+                                <div className="text-[9px] text-bubble-outbound-meta mt-1.5 block">
+                                  {getComponentOf(selectedTemplate.components, 'FOOTER')?.text}
+                                </div>
+                              )}
+
+                              {/* Timestamp + double-tick */}
+                              <div className="self-end text-[8px] text-bubble-outbound-meta mt-1.5 leading-none font-sans flex items-center gap-0.5">
+                                9:30 PM <span className="text-[#53bdeb]">✓✓</span>
+                              </div>
                             </div>
 
-                            {/* Footer element */}
-                            {getComponentOf(selectedTemplate.components, 'FOOTER') && (
-                              <div className="text-[8px] text-bubble-outbound-meta mt-1 block">
-                                {getComponentOf(selectedTemplate.components, 'FOOTER')?.text}
+                            {/* Integrated Buttons listing inside outbound bubble */}
+                            {getComponentOf(selectedTemplate.components, 'BUTTONS') && (
+                              <div className="border-t border-wa-chat-divider flex flex-col">
+                                {getComponentOf(selectedTemplate.components, 'BUTTONS')?.buttons?.map((btn: any, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="w-full border-t border-wa-chat-divider first:border-t-0 py-3 px-3 text-xs text-wa-chat-button-text font-bold text-center flex items-center justify-center gap-1.5 cursor-pointer hover:bg-black/10 transition-all"
+                                  >
+                                    {btn.type === 'URL' && <ExternalLink className="h-3 w-3 text-wa-chat-button-text" />}
+                                    {btn.type === 'PHONE_NUMBER' && <Phone className="h-3 w-3 text-wa-chat-button-text" />}
+                                    {btn.type === 'QUICK_REPLY' && <CornerUpLeft className="h-3 w-3 text-wa-chat-button-text" />}
+                                    {btn.text}
+                                  </div>
+                                ))}
                               </div>
                             )}
+                          </div>
+                        </div>
+                      </div>
 
-                            {/* Timestamp & checkmarks */}
-                            <div className="self-end flex items-center gap-1 mt-1 text-[7px] text-bubble-outbound-meta leading-none">
-                              <span>12:34 PM</span>
-                              <span className="text-[#53bdeb]">✓✓</span>
+                        {/* WhatsApp Bottom Input Bar Mockup */}
+                        <div className="px-2.5 py-2 bg-zinc-900 border-t border-zinc-800/80 flex items-center gap-2 shrink-0 select-none z-10">
+                          <div className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-zinc-500 text-sm">☺</span>
+                              <span className="text-zinc-600 text-[10px] font-sans">Type a message</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-zinc-500">
+                              <span className="text-xs rotate-45 inline-block">📎</span>
                             </div>
                           </div>
-
-                          {/* Interactive Buttons listing underneath outgoing bubble */}
-                          {getComponentOf(selectedTemplate.components, 'BUTTONS') && (
-                            <div className="self-end w-full max-w-[90%] space-y-1.5 z-10">
-                              {getComponentOf(selectedTemplate.components, 'BUTTONS')?.buttons?.map((btn: any, idx: number) => (
-                                <div
-                                  key={idx}
-                                  className="w-full bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 rounded-lg py-1.5 px-3 text-[10px] text-cyan-400 font-bold text-center flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-sm"
-                                >
-                                  {btn.type === 'URL' && <ExternalLink className="h-3 w-3" />}
-                                  {btn.text}
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          <div className="w-7 h-7 rounded-full bg-cyan-600 flex items-center justify-center text-white text-[11px] shadow-sm shrink-0">
+                            <span>🎤</span>
+                          </div>
                         </div>
                       </div>
 
                       {/* iPhone Home Indicator bar at the bottom */}
-                      <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24 h-1 bg-zinc-700/60 rounded-full z-30" />
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-0.8 bg-black/40 rounded-full z-30" />
                     </div>
                   </div>
                 </div>
 
                 {/* Drawer Footer Actions */}
-                <div className="border-t border-zinc-900/60 p-5 bg-[#0b0b0f]/60 backdrop-blur-md flex items-center justify-between gap-3 relative z-10">
+                <div className="border-t border-zinc-800/60 p-5 bg-[#0b0b0f]/60 backdrop-blur-md flex items-center justify-between gap-3 relative z-10">
                   <button
                     onClick={() => setSelectedTemplate(null)}
                     className="w-full flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-300 neon-btn-secondary"
@@ -1116,16 +1158,16 @@ export default function MessageTemplatesPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="relative w-full max-w-4xl max-h-[90vh] bg-zinc-950 border border-zinc-900 shadow-2xl rounded-2xl flex flex-col justify-between overflow-hidden pointer-events-auto"
+                className="relative w-full max-w-4xl max-h-[90vh] bg-zinc-950 border border-zinc-800 shadow-2xl rounded-2xl flex flex-col justify-between overflow-hidden pointer-events-auto"
               >
                 {/* Decorative glows */}
                 <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
                 <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
 
                 {/* Drawer Header */}
-                <div className="flex items-center justify-between border-b border-zinc-900 p-5 relative z-10 bg-zinc-950/40">
+                <div className="flex items-center justify-between border-b border-zinc-800 p-5 relative z-10 bg-zinc-950/40">
                   <div>
-                    <h3 className="font-extrabold text-sm text-white flex items-center gap-1.5 uppercase tracking-wide">
+                    <h3 className="font-extrabold text-sm text-zinc-100 flex items-center gap-1.5 uppercase tracking-wide">
                       <Sparkles className="h-4 w-4 text-cyan-400 animate-pulse" />
                       Create Message Template
                     </h3>
@@ -1133,7 +1175,7 @@ export default function MessageTemplatesPage() {
                   </div>
                   <button
                     onClick={() => setIsCreateOpen(false)}
-                    className="rounded-lg p-1.5 hover:bg-zinc-900 text-zinc-400 hover:text-white transition-all"
+                    className="rounded-lg p-1.5 hover:bg-zinc-900 text-zinc-400 hover:text-zinc-100 transition-all"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -1142,7 +1184,7 @@ export default function MessageTemplatesPage() {
                 {/* Drawer Scrollable Form Content & Live Preview Split */}
                 <form onSubmit={handleCreateDraft} className="flex-1 overflow-hidden flex flex-col md:flex-row text-xs text-zinc-300 relative z-10">
                   {/* Left Column: Form Fields (scrollable) */}
-                  <div className="flex-1 overflow-y-auto p-6 space-y-6 border-r border-zinc-900/60">
+                  <div className="flex-1 overflow-y-auto p-6 space-y-6 border-r border-zinc-800/60">
                   {/* 1. Template Name */}
                   <div className="space-y-1.5">
                     <label className="block font-bold text-zinc-400 uppercase tracking-widest text-[9px]">
@@ -1154,7 +1196,7 @@ export default function MessageTemplatesPage() {
                       placeholder="e.g. welcome_member"
                       value={formName}
                       onChange={(e) => handleNameInput(e.target.value)}
-                      className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-650 focus:outline-none focus:border-cyan-500 font-mono tracking-tight"
+                      className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder-zinc-650 focus:outline-none focus:border-cyan-500 font-mono tracking-tight"
                     />
                     <p className="text-[10px] text-zinc-500">
                       Lower-case alphanumeric values and underscores only. Spaces and hyphens auto-converted.
@@ -1170,7 +1212,7 @@ export default function MessageTemplatesPage() {
                       <select
                         value={formCategory}
                         onChange={(e) => setFormCategory(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+                        className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-zinc-100 focus:outline-none focus:border-cyan-500 cursor-pointer"
                       >
                         <option value="UTILITY">Utility (Reminders, Alert)</option>
                         <option value="MARKETING">Marketing (Offer, News)</option>
@@ -1185,7 +1227,7 @@ export default function MessageTemplatesPage() {
                       <select
                         value={formLanguage}
                         onChange={(e) => setFormLanguage(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+                        className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-zinc-100 focus:outline-none focus:border-cyan-500 cursor-pointer"
                       >
                         <option value="en_US">English (US) - en_US</option>
                         <option value="en_GB">English (UK) - en_GB</option>
@@ -1236,7 +1278,7 @@ export default function MessageTemplatesPage() {
                           value={formHeaderText}
                           onChange={(e) => setFormHeaderText(e.target.value)}
                           maxLength={60}
-                          className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                          className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                         />
                       </div>
                     )}
@@ -1285,7 +1327,7 @@ export default function MessageTemplatesPage() {
                       placeholder="Enter main message body...&#10;e.g. Hello {{1}}, your membership at {{2}} is active!"
                       value={formBody}
                       onChange={(e) => setFormBody(e.target.value)}
-                      className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500 leading-relaxed font-sans"
+                      className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500 leading-relaxed font-sans"
                     />
                     <div className="flex items-start gap-1 text-[10px] text-zinc-500">
                       <Info className="h-3.5 w-3.5 text-cyan-500 shrink-0 mt-0.5" />
@@ -1306,7 +1348,7 @@ export default function MessageTemplatesPage() {
                       value={formFooter}
                       onChange={(e) => setFormFooter(e.target.value)}
                       maxLength={60}
-                      className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-white placeholder-zinc-650 focus:outline-none focus:border-cyan-500"
+                      className="w-full rounded-xl border border-zinc-850 bg-zinc-900 px-4 py-3 text-zinc-100 placeholder-zinc-650 focus:outline-none focus:border-cyan-500"
                     />
                   </div>
 
@@ -1332,7 +1374,7 @@ export default function MessageTemplatesPage() {
                         {formButtons.map((btn, idx) => (
                           <div
                             key={btn.id}
-                            className="rounded-xl border border-zinc-900 bg-zinc-900/10 p-3.5 space-y-3 text-xs"
+                            className="rounded-xl border border-zinc-800 bg-zinc-900/10 p-3.5 space-y-3 text-xs"
                           >
                             <div className="flex items-center justify-between gap-3">
                               <span className="font-extrabold text-[10px] text-zinc-500 uppercase tracking-wider">
@@ -1355,7 +1397,7 @@ export default function MessageTemplatesPage() {
                                 <select
                                   value={btn.type}
                                   onChange={(e) => handleUpdateButton(btn.id, 'type', e.target.value as any)}
-                                  className="w-full rounded-lg border border-zinc-850 bg-zinc-900 px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+                                  className="w-full rounded-lg border border-zinc-850 bg-zinc-900 px-2 py-1.5 text-[10px] text-zinc-100 focus:outline-none focus:border-cyan-500 cursor-pointer"
                                 >
                                   <option value="QUICK_REPLY">Quick Reply</option>
                                   <option value="URL">Visit URL</option>
@@ -1374,7 +1416,7 @@ export default function MessageTemplatesPage() {
                                   placeholder="Button Label"
                                   value={btn.text}
                                   onChange={(e) => handleUpdateButton(btn.id, 'text', e.target.value)}
-                                  className="w-full rounded-lg border border-zinc-850 bg-zinc-900 px-2 py-1.5 text-[10px] text-white focus:outline-none focus:border-cyan-500"
+                                  className="w-full rounded-lg border border-zinc-850 bg-zinc-900 px-2 py-1.5 text-[10px] text-zinc-100 focus:outline-none focus:border-cyan-500"
                                 />
                               </div>
 
@@ -1389,7 +1431,7 @@ export default function MessageTemplatesPage() {
                                     placeholder={btn.type === 'URL' ? 'https://example.com' : '+155500000'}
                                     value={btn.value}
                                     onChange={(e) => handleUpdateButton(btn.id, 'value', e.target.value)}
-                                    className="w-full rounded-lg border border-zinc-850 bg-zinc-900 px-2.5 py-1.5 text-[10px] text-white focus:outline-none focus:border-cyan-500 font-mono"
+                                    className="w-full rounded-lg border border-zinc-850 bg-zinc-900 px-2.5 py-1.5 text-[10px] text-zinc-100 focus:outline-none focus:border-cyan-500 font-mono"
                                   />
                                 </div>
                               )}
@@ -1406,69 +1448,78 @@ export default function MessageTemplatesPage() {
                   </div>
 
                   {/* Right Column: Live Smartphone Preview */}
-                  <div className="w-full md:w-[340px] shrink-0 bg-zinc-950/20 p-6 flex flex-col items-center justify-center overflow-y-auto border-l border-zinc-900/60">
+                  <div className="w-full md:w-[340px] shrink-0 bg-zinc-950/20 p-6 flex flex-col items-center justify-center overflow-y-auto border-l border-zinc-800/60">
                     <div className="flex items-center gap-1.5 self-start mb-4">
                       <span className="h-1.5 w-1.5 rounded-full bg-[#00a884] animate-pulse" />
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Live WhatsApp Preview</span>
                     </div>
 
                     {/* Smartphone Frame Mockup Wrapper */}
-                    <div className="relative mx-auto w-[270px] h-[480px] rounded-[38px] border-[10px] border-zinc-800 bg-wa-chat-bg shadow-2xl overflow-hidden flex flex-col justify-between font-sans select-none ring-1 ring-zinc-700/50">
-                      {/* Speaker Notch / Dynamic Island */}
-                      <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-24 h-4.5 bg-zinc-850 rounded-full z-30 flex items-center justify-center border border-zinc-800/40">
-                        <div className="w-1.5 h-1.5 bg-zinc-900 rounded-full ml-1.5" />
-                        <div className="w-8 h-1 bg-zinc-800/60 rounded-full ml-3" />
-                      </div>
-
-                      {/* Camera Lens Indicator */}
-                      <div className="absolute top-2.5 right-6 w-2 h-2 bg-zinc-900 rounded-full z-30" />
+                    <div className="relative mx-auto w-[270px] h-[480px] rounded-[44px] border-[6px] border-black bg-wa-chat-bg shadow-2xl overflow-hidden flex flex-col justify-between font-sans select-none ring-2 ring-zinc-800">
+                      {/* iPhone Notch */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-4.5 bg-black rounded-b-xl z-30" />
 
                       {/* Screen Content Wrapper */}
-                      <div className="flex-1 flex flex-col justify-between overflow-hidden relative pt-7 pb-4">
-                        {/* WhatsApp Header Mockup */}
-                        <div className="bg-zinc-900 px-3.5 py-2.5 flex items-center justify-between border-b border-zinc-800 shrink-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-zinc-400 text-xs cursor-pointer select-none">←</span>
-                            <div className="w-6.5 h-6.5 rounded-full bg-cyan-600 flex items-center justify-center text-white font-extrabold text-[10px]">
-                              <FileText className="w-3.5 h-3.5 text-white" />
-                            </div>
-                            <div>
-                              <span className="block text-[10px] font-bold text-zinc-100 leading-tight">Gym Member</span>
-                              <span className="block text-[8px] text-emerald-400 leading-tight font-semibold">online</span>
+                      <div className="flex-1 flex flex-col justify-between overflow-hidden relative pt-0 pb-1.5">
+                        <div className="flex flex-col shrink-0">
+                          {/* Status Bar */}
+                          <div className="h-6 bg-zinc-900 px-5 pt-1.5 flex items-center justify-between text-white text-[9px] font-medium z-20 select-none">
+                            <span>10:37</span>
+                            <div className="flex items-center gap-1.5">
+                              <svg className="w-2 h-2 fill-current opacity-65" viewBox="0 0 24 24">
+                                <path d="M2 22h20V2z"/>
+                              </svg>
+                              <svg className="w-2.2 h-2.2 fill-current opacity-65" viewBox="0 0 24 24">
+                                <path d="M12 21l-12-12c4.4-4.4 11.6-4.4 16 0z"/>
+                              </svg>
+                              <div className="w-3 h-1.8 border border-white/60 rounded-[2.5px] p-[0.5px] flex items-center">
+                                <div className="w-full h-full bg-white/60 rounded-[0.5px]" />
+                              </div>
                             </div>
                           </div>
-                          <div className="flex gap-2 text-zinc-400 text-[9px] select-none">
-                            <span>📞</span>
-                            <span>⋮</span>
+
+                          {/* WhatsApp Header Mockup */}
+                          <div className="bg-zinc-900 px-3.5 py-2.5 flex items-center justify-between text-white border-b border-zinc-800 shrink-0 shadow-sm relative z-10">
+                            <div className="flex items-center gap-2">
+                              <span className="text-zinc-400 text-xs cursor-pointer select-none">←</span>
+                              <div className="w-6.5 h-6.5 rounded-full bg-cyan-600 flex items-center justify-center text-white font-extrabold text-[10px]">
+                                <FileText className="w-3.5 h-3.5 text-white" />
+                              </div>
+                              <div>
+                                <span className="block text-[10px] font-bold text-zinc-100 leading-tight">Gym Member</span>
+                                <span className="block text-[8px] text-emerald-400 leading-tight font-semibold">online</span>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 text-zinc-400 text-[9px] select-none">
+                              <span>📞</span>
+                              <span>⋮</span>
+                            </div>
                           </div>
                         </div>
 
                         {/* Chat Area Mockup */}
-                        <div className="flex-1 p-3.5 space-y-3 relative bg-wa-chat-bg overflow-y-auto flex flex-col justify-end font-sans">
-                          {/* Background WhatsApp Doodle grid effect */}
-                          <div className="absolute inset-0 opacity-[0.05] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:10px_10px] pointer-events-none" />
-
-                          {/* Chat Message Bubble (Outgoing) */}
-                          <div className="relative self-end bg-bubble-outbound-bg text-bubble-outbound-text p-2.5 rounded-lg rounded-tr-none max-w-[90%] shadow-md border border-bubble-outbound-bg z-10 flex flex-col text-[10px] leading-relaxed">
-                            {/* Header element */}
-                            {formHeaderType === 'TEXT' && formHeaderText && (
-                              <div className="font-bold text-bubble-outbound-text text-[10px] border-b border-bubble-outbound-meta/20 pb-1 mb-1.5">
-                                {formHeaderText}
-                              </div>
-                            )}
+                        <div className="flex-1 p-3.5 space-y-3 relative bg-wa-chat-bg overflow-y-auto flex flex-col justify-end">
+                          {/* Background WhatsApp Doodle image effect */}
+                          <div className="absolute inset-0 bg-[url('/chat-bg.png')] bg-repeat bg-center opacity-30 dark:opacity-[0.5] pointer-events-none" />
+                          {/* Chat Message Bubble (Outbound) Wrapper */}
+                          <div className="relative self-end w-fit max-w-[92%] z-10 flex flex-col">
+                            {/* WhatsApp Chat Bubble Tail (right side) */}
+                            <div className="absolute top-0 -right-1.5 w-0 h-0 border-t-[8px] border-t-bubble-outbound-bg border-r-[8px] border-r-transparent" />
+                            
+                            {/* Inner Bubble Container */}
+                            <div className="bg-bubble-outbound-bg text-bubble-outbound-text rounded-lg rounded-tr-none shadow-md border border-bubble-outbound-bg overflow-hidden flex flex-col text-xs leading-relaxed">
+                            
+                            {/* Header element (Full Width Media) */}
                             {formHeaderType === 'IMAGE' && formHeaderPreviewUrl ? (
-                              <div className="rounded-lg overflow-hidden border border-bubble-outbound-meta/10 mb-1 max-h-[140px] relative">
+                              <div className="w-full overflow-hidden border-b border-wa-chat-divider max-h-[140px] relative">
                                 <img
                                   src={formHeaderPreviewUrl}
                                   alt="Header Image Preview"
                                   className="w-full h-auto max-h-[140px] object-cover"
                                 />
-                                <div className="absolute bottom-1 right-1 bg-black/50 px-1 py-0.5 rounded text-[6px] text-white">
-                                  IMAGE
-                                </div>
                               </div>
                             ) : formHeaderType === 'VIDEO' && formHeaderPreviewUrl ? (
-                              <div className="rounded-lg overflow-hidden border border-bubble-outbound-meta/10 mb-1 max-h-[140px] relative font-sans">
+                              <div className="w-full overflow-hidden border-b border-wa-chat-divider max-h-[140px] relative font-sans">
                                 <video
                                   src={formHeaderPreviewUrl}
                                   className="w-full h-auto max-h-[140px] object-cover"
@@ -1476,53 +1527,80 @@ export default function MessageTemplatesPage() {
                                 />
                               </div>
                             ) : ['IMAGE', 'VIDEO', 'DOCUMENT'].includes(formHeaderType) && (
-                              <div className="rounded-lg bg-black/10 border border-bubble-outbound-meta/10 p-3 text-center text-[9px] text-bubble-outbound-text flex flex-col items-center justify-center gap-1 mb-1">
-                                <Upload className="h-3.5 w-3.5 text-cyan-400" />
+                              <div className="bg-black/10 border-b border-wa-chat-divider p-4 text-center text-[10px] text-bubble-outbound-text flex flex-col items-center justify-center gap-1">
+                                <Upload className="h-5 w-5 text-cyan-500" />
                                 <span className="font-bold">{formHeaderType}</span>
-                                <span className="text-[7px] text-bubble-outbound-meta truncate max-w-[120px]">
+                                <span className="text-[8px] text-bubble-outbound-meta truncate max-w-[150px]">
                                   {formHeaderFile ? formHeaderFile.name : `Select ${formHeaderType.toLowerCase()} file`}
                                 </span>
                               </div>
                             )}
 
-                            {/* Body element */}
-                            <div className="whitespace-pre-wrap leading-relaxed text-[10px] break-words">
-                              {formBody || 'Enter template body content...'}
+                            {/* Text content with padding */}
+                            <div className="p-3.5 flex flex-col">
+                              {formHeaderType === 'TEXT' && formHeaderText && (
+                                <div className="font-bold text-bubble-outbound-text text-xs border-b border-wa-chat-divider pb-1.5 mb-2 font-sans">
+                                  {formHeaderText}
+                                </div>
+                              )}
+
+                              {/* Body element */}
+                              <div className="whitespace-pre-wrap leading-relaxed text-xs break-words text-bubble-outbound-text">
+                                {formBody || 'Enter template body content...'}
+                              </div>
+
+                              {/* Footer element */}
+                              {formFooter && (
+                                <div className="text-[9px] text-bubble-outbound-meta mt-1.5 block">
+                                  {formFooter}
+                                </div>
+                              )}
+
+                              {/* Timestamp + double-tick */}
+                              <div className="self-end text-[8px] text-bubble-outbound-meta mt-1.5 leading-none font-sans flex items-center gap-0.5">
+                                9:30 PM <span className="text-[#53bdeb]">✓✓</span>
+                              </div>
                             </div>
 
-                            {/* Footer element */}
-                            {formFooter && (
-                              <div className="text-[8px] text-bubble-outbound-meta mt-1 block">
-                                {formFooter}
+                            {/* Integrated Buttons listing inside outbound bubble */}
+                            {formButtons.length > 0 && (
+                              <div className="border-t border-wa-chat-divider flex flex-col bg-[#1f2c34]/50 dark:bg-black/20">
+                                {formButtons.map((btn) => (
+                                  <div
+                                    key={btn.id}
+                                    className="w-full border-t border-wa-chat-divider first:border-t-0 py-3 px-3 text-xs text-wa-chat-button-text font-bold text-center flex items-center justify-center gap-1.5 cursor-pointer hover:bg-black/10 transition-all font-sans"
+                                  >
+                                    {btn.type === 'URL' && <ExternalLink className="h-3 w-3 text-wa-chat-button-text" />}
+                                    {btn.type === 'PHONE_NUMBER' && <Phone className="h-3 w-3 text-wa-chat-button-text" />}
+                                    {btn.type === 'QUICK_REPLY' && <CornerUpLeft className="h-3 w-3 text-wa-chat-button-text" />}
+                                    {btn.text || 'Button Label'}
+                                  </div>
+                                ))}
                               </div>
                             )}
+                          </div>
+                        </div>
+                      </div>
 
-                            {/* Timestamp & checkmarks */}
-                            <div className="self-end flex items-center gap-1 mt-1 text-[7px] text-bubble-outbound-meta leading-none">
-                              <span>12:34 PM</span>
-                              <span className="text-[#53bdeb]">✓✓</span>
+                        {/* WhatsApp Bottom Input Bar Mockup */}
+                        <div className="px-2.5 py-2 bg-zinc-900 border-t border-zinc-800/80 flex items-center gap-2 shrink-0 select-none z-10">
+                          <div className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-1.5 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-zinc-500 text-sm">☺</span>
+                              <span className="text-zinc-650 text-[10px] font-sans">Type a message</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-zinc-500">
+                              <span className="text-xs rotate-45 inline-block">📎</span>
                             </div>
                           </div>
-
-                          {/* Interactive Buttons listing underneath outgoing bubble */}
-                          {formButtons.length > 0 && (
-                            <div className="self-end w-full max-w-[90%] space-y-1.5 z-10">
-                              {formButtons.map((btn) => (
-                                <div
-                                  key={btn.id}
-                                  className="w-full bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 rounded-lg py-1.5 px-3 text-[10px] text-cyan-400 font-bold text-center flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-sm font-sans"
-                                >
-                                  {btn.type === 'URL' && <ExternalLink className="h-3 w-3" />}
-                                  {btn.text || 'Button Label'}
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                          <div className="w-7 h-7 rounded-full bg-cyan-600 flex items-center justify-center text-white text-[11px] shadow-sm shrink-0">
+                            <span>🎤</span>
+                          </div>
                         </div>
                       </div>
 
                       {/* iPhone Home Indicator bar at the bottom */}
-                      <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24 h-1 bg-zinc-700/60 rounded-full z-30" />
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-0.8 bg-black/40 rounded-full z-30" />
                     </div>
                   </div>
 
@@ -1531,14 +1609,14 @@ export default function MessageTemplatesPage() {
                 </form>
 
                 {/* Drawer Footer Actions */}
-                <div className="border-t border-zinc-900 p-5 bg-zinc-950/60 flex items-center justify-between gap-3 shrink-0 relative z-10">
+                <div className="border-t border-zinc-800 p-5 bg-zinc-950/60 flex items-center justify-between gap-3 shrink-0 relative z-10">
                   <button
                     type="button"
                     onClick={() => {
                       resetForm();
                       setIsCreateOpen(false);
                     }}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-3 text-xs font-bold text-zinc-400 hover:text-white transition-all"
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-3 text-xs font-bold text-zinc-400 hover:text-zinc-100 transition-all"
                   >
                     Cancel
                   </button>
@@ -1588,46 +1666,63 @@ function renderComponentSummary(componentsJson: any): React.ReactNode {
   const buttons = list.find((c: any) => c.type === 'BUTTONS');
 
   return (
-    <div className="bg-wa-chat-bg rounded-xl p-3.5 border border-zinc-800 relative overflow-hidden font-sans select-none h-[170px] max-h-[170px] flex flex-col justify-between transition-all duration-300">
+    <div className="bg-wa-chat-bg rounded-xl p-3.5 border border-black/20 ring-1 ring-black/10 relative overflow-hidden font-sans select-none h-[175px] max-h-[175px] flex flex-col justify-start transition-all duration-300">
+      {/* Background WhatsApp Doodle image effect */}
+      <div className="absolute inset-0 bg-[url('/chat-bg.png')] bg-repeat bg-center opacity-30 dark:opacity-[0.5] pointer-events-none" />
       {/* Outer wrapper representing the chat view */}
-      <div className="flex flex-col items-start w-full overflow-hidden">
-        {/* Message bubble */}
-        <div className="w-[90%] max-w-[90%] bg-bubble-outbound-bg rounded-2xl rounded-tl-none p-3 shadow-md space-y-1 relative text-[11px] leading-relaxed transition-all duration-300">
-          {/* WhatsApp Chat Bubble Tail */}
-          <div className="absolute top-0 -left-1.5 w-0 h-0 border-t-[8px] border-t-bubble-outbound-bg border-l-[8px] border-l-transparent transition-all duration-300" />
+      <div className="flex flex-col items-end w-full overflow-y-auto z-10 pl-1 pr-1.5">
+        {/* Message bubble (Outbound) Wrapper */}
+        <div className="relative w-fit max-w-[90%] z-10 flex flex-col self-end">
+          {/* WhatsApp Chat Bubble Tail (right side) */}
+          <div className="absolute top-0 -right-1.5 w-0 h-0 border-t-[8px] border-t-bubble-outbound-bg border-r-[8px] border-r-transparent transition-all duration-300" />
           
-          {header && (
-            <div className="font-extrabold text-[10px] text-bubble-outbound-meta uppercase tracking-wide border-b border-zinc-800/10 pb-1 mb-1 font-sans truncate">
-              {header.format === 'TEXT' ? header.text : `📎 ${header.format} Header`}
+          {/* Inner Bubble Container */}
+          <div className="bg-bubble-outbound-bg text-bubble-outbound-text rounded-lg rounded-tr-none shadow-md relative text-[11px] leading-relaxed transition-all duration-300 border border-bubble-outbound-bg overflow-hidden flex flex-col">
+          
+          {/* Bubble content wrapper (for padding) */}
+          <div className="p-2.5 flex flex-col">
+            {header && (
+              <div className="font-extrabold text-[9px] text-bubble-outbound-meta uppercase tracking-wide border-b border-wa-chat-divider pb-1 mb-1 font-sans truncate">
+                {header.format === 'TEXT' ? header.text : `📎 ${header.format} Header`}
+              </div>
+            )}
+            
+            {body && (
+              <p className="text-bubble-outbound-text whitespace-pre-wrap font-normal font-sans line-clamp-3">
+                {body.text}
+              </p>
+            )}
+            
+            {footer && (
+              <div className="text-[9px] text-bubble-outbound-meta mt-0.5 font-medium font-sans truncate">
+                {footer.text}
+              </div>
+            )}
+
+            {/* Timestamp + double-tick */}
+            <div className="self-end text-[7px] text-bubble-outbound-meta mt-0.5 font-sans leading-none flex items-center gap-0.5">
+              9:30 PM <span className="text-[#53bdeb]">✓✓</span>
             </div>
-          )}
-          
-          {body && (
-            <p className="text-bubble-outbound-text whitespace-pre-wrap font-normal font-sans line-clamp-3">
-              {body.text}
-            </p>
-          )}
-          
-          {footer && (
-            <div className="text-[9px] text-bubble-outbound-meta mt-0.5 font-medium font-sans truncate">
-              {footer.text}
+          </div>
+
+          {/* Integrated Buttons inside the bubble */}
+          {buttons && buttons.buttons && buttons.buttons.length > 0 && (
+            <div className="border-t border-wa-chat-divider flex flex-col">
+              {buttons.buttons.slice(0, 2).map((b: any, idx: number) => (
+                <div
+                  key={idx}
+                  className="w-full border-t border-wa-chat-divider first:border-t-0 py-1.5 px-3 text-[9px] text-wa-chat-button-text font-bold text-center flex items-center justify-center gap-1 hover:bg-black/10 transition-all duration-300"
+                >
+                  {b.type === 'URL' && <ExternalLink className="h-2.5 w-2.5" />}
+                  {b.type === 'PHONE_NUMBER' && <Phone className="h-2.5 w-2.5" />}
+                  {b.type === 'QUICK_REPLY' && <CornerUpLeft className="h-2.5 w-2.5" />}
+                  {b.text}
+                </div>
+              ))}
             </div>
           )}
         </div>
-
-        {/* Buttons list rendered underneath message bubble like real interactive templates */}
-        {buttons && buttons.buttons && buttons.buttons.length > 0 && (
-          <div className="space-y-1 mt-1.5 w-[90%] max-w-xs pl-2">
-            {buttons.buttons.slice(0, 2).map((b: any, idx: number) => (
-              <div
-                key={idx}
-                className="w-full bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 rounded-lg py-1 px-3 text-[10px] text-cyan-400 font-bold text-center flex items-center justify-center gap-1 shadow-sm truncate transition-all duration-300"
-              >
-                {b.text}
-              </div>
-            ))}
-          </div>
-        )}
+      </div>
       </div>
     </div>
   );

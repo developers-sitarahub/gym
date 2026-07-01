@@ -10,17 +10,47 @@ router.post('/register', async (req, res) => {
   try {
     const { gymName, gymSlug, ownerName, ownerEmail, ownerPassword } = req.body;
 
-    if (!gymName || !gymSlug || !ownerName || !ownerEmail || !ownerPassword) {
+    if (!gymName || !ownerName || !ownerEmail || !ownerPassword) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    // Check slug uniqueness
-    const existingGym = await prisma.gym.findUnique({
-      where: { slug: gymSlug.toLowerCase() },
-    });
+    // Generate or clean gym slug
+    let computedSlug = gymSlug;
+    if (!computedSlug) {
+      const baseSlug = gymName
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '');
+      
+      let finalSlug = baseSlug || 'gym';
+      let isUnique = false;
+      
+      while (!isUnique) {
+        const existing = await prisma.gym.findUnique({
+          where: { slug: finalSlug },
+        });
+        if (!existing) {
+          isUnique = true;
+        } else {
+          finalSlug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
+        }
+      }
+      computedSlug = finalSlug;
+    } else {
+      computedSlug = computedSlug.toLowerCase();
+      // Check slug uniqueness
+      const existingGym = await prisma.gym.findUnique({
+        where: { slug: computedSlug },
+      });
 
-    if (existingGym) {
-      return res.status(400).json({ error: 'Gym slug already taken' });
+      if (existingGym) {
+        return res.status(400).json({ error: 'Gym slug already taken' });
+      }
     }
 
     // Check user uniqueness
@@ -39,7 +69,7 @@ router.post('/register', async (req, res) => {
       const gym = await tx.gym.create({
         data: {
           name: gymName,
-          slug: gymSlug.toLowerCase(),
+          slug: computedSlug,
         },
       });
 

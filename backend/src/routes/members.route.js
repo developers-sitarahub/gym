@@ -27,11 +27,7 @@ router.get("/", async (req, res) => {
       include: {
         memberships: {
           include: {
-            plan: {
-              select: {
-                name: true
-              }
-            }
+            plan: true
           }
         }
       },
@@ -41,7 +37,7 @@ router.get("/", async (req, res) => {
     // Map memberName to name for frontend compatibility
     const mappedMembers = members.map(m => ({
       ...m,
-      name: m.memberName
+      name: m.memberName || ''
     }));
 
     res.json({ members: mappedMembers });
@@ -58,7 +54,7 @@ router.get("/", async (req, res) => {
  */
 router.post("/", async (req, res) => {
   const { gymSlug } = req.params;
-  const { name, memberName, phone, email, address, dob, emergencyContact, notes } = req.body;
+  const { name, memberName, phone, email, address, dob, emergencyContact, notes, planId, startDate, endDate } = req.body;
   const actualName = name || memberName;
 
   if (!actualName || !phone) {
@@ -92,19 +88,36 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "A member with this phone number is already registered." });
     }
 
+
+    const memberData = {
+      gymId: gym.id,
+      memberName: actualName,
+      phone: formattedPhone,
+      email: email || null,
+      address: address || null,
+      dob: dob ? new Date(dob) : null,
+      emergencyContact: emergencyContact || null,
+      notes: notes || null
+    };
+
+    if (planId && startDate && endDate) {
+      memberData.memberships = {
+        create: {
+          gymId: gym.id,
+          planId: planId,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+          status: "ACTIVE"
+        }
+      };
+    }
+
     const newMember = await prisma.member.create({
-      data: {
-        gymId: gym.id,
-        memberName: actualName,
-        phone: formattedPhone,
-        email: email || null,
-        address: address || null,
-        dob: dob ? new Date(dob) : null,
-        emergencyContact: emergencyContact || null,
-        notes: notes || null
-      },
+      data: memberData,
       include: {
-        memberships: true
+        memberships: {
+          include: { plan: true }
+        }
       }
     });
 
@@ -145,13 +158,12 @@ router.post("/", async (req, res) => {
 
 /**
  * =====================================
- * GET MEMBER MESSAGES (AUDIT TRAIL)
+ * GET MEMBER MESSAGES LOGS
  * =====================================
  */
 router.get("/:memberId/messages", async (req, res) => {
-  const { gymSlug, memberId } = req.params;
-
   try {
+    const { gymSlug, memberId } = req.params;
     const messages = await prisma.notification.findMany({
       where: {
         memberId,
@@ -159,100 +171,67 @@ router.get("/:memberId/messages", async (req, res) => {
       },
       orderBy: { createdAt: "asc" },
     });
-
     res.json({ messages });
   } catch (err) {
-    console.error("❌ [Member Messages GET] Error:", err);
+    console.error("❌ [Members GET Messages] Error:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 /**
  * =====================================
- * TOGGLE BOT CHATBOT PAUSE/RESUME
+ * TOGGLE BOT FOR A MEMBER (TAKEOVER)
  * =====================================
  */
 router.post("/:memberId/toggle-bot", async (req, res) => {
-  const { gymSlug, memberId } = req.params;
-  const { isBotDisabled } = req.body;
-
-  if (typeof isBotDisabled !== "boolean") {
-    return res.status(400).json({ error: "isBotDisabled must be a boolean" });
-  }
-
   try {
-    const gym = await prisma.gym.findUnique({
-      where: { slug: gymSlug.toLowerCase() },
-      select: { id: true }
+    const { gymSlug, memberId } = req.params;
+    const { isBotDisabled } = req.body;
+
+    const member = await prisma.member.update({
+      where: {
+        id: memberId,
+        gym: { slug: gymSlug.toLowerCase() },
+      },
+      data: { isBotDisabled },
     });
-
-    if (!gym) {
-      return res.status(404).json({ error: "Gym not found" });
-    }
-
-    const member = await prisma.member.findUnique({
-      where: { id: memberId }
-    });
-
-    if (!member || member.gymId !== gym.id) {
-      return res.status(404).json({ error: "Member not found" });
-    }
-
-    const updatedMember = await prisma.member.update({
-      where: { id: memberId },
-      data: { isBotDisabled }
-    });
-
-    const mappedMember = {
-      ...updatedMember,
-      name: updatedMember.memberName
-    };
 
     await prisma.auditLog.create({
       data: {
-        action: isBotDisabled ? "BOT_TAKEOVER_START" : "BOT_TAKEOVER_STOP",
-        details: isBotDisabled
-          ? `Human took over conversation with member ${member.memberName} (${member.phone}). Bot paused.`
-          : `Chatbot resumed control for member ${member.memberName} (${member.phone}).`,
-        gymId: gym.id,
-        userId: req.user?.userId || null
-      }
+        action: isBotDisabled ? "BOT_PAUSE" : "BOT_RESUME",
+        details: `${isBotDisabled ? "Paused" : "Resumed"} chatbot for member ${member.memberName || ''} (${member.phone})`,
+        gymId: member.gymId,
+        userId: req.user?.userId || null,
+      },
     });
 
-    res.json({ success: true, member: mappedMember });
+    res.json({ success: true, member });
   } catch (err) {
-    console.error("❌ [Member Toggle Bot] Error:", err);
+    console.error("❌ [Members POST Toggle Bot] Error:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 /**
  * =====================================
- * UPDATE MEMBER
+ * UPDATE A MEMBER
  * =====================================
  */
 router.put("/:memberId", async (req, res) => {
-  const { gymSlug, memberId } = req.params;
-  const { name, memberName, phone, email, address, dob, emergencyContact, notes } = req.body;
-  const actualName = name || memberName;
-
-  if (!actualName || !phone) {
-    return res.status(400).json({ error: "Name and Phone number are required" });
-  }
-
   try {
+    const { gymSlug, memberId } = req.params;
+    const { name, phone, email, address, dob, emergencyContact, notes, planId, startDate, endDate } = req.body;
+
+    if (!name || !phone) {
+      return res.status(400).json({ error: "Name and phone are required" });
+    }
+
     const gym = await prisma.gym.findUnique({
       where: { slug: gymSlug.toLowerCase() },
-      select: { id: true }
     });
 
     if (!gym) {
       return res.status(404).json({ error: "Gym not found" });
-    }
-
-    const phoneRegex = /^\+?[0-9]+$/;
-    if (!phoneRegex.test(phone)) {
-      return res.status(400).json({ error: "WhatsApp Phone Number must contain only numbers (optionally starting with +)" });
     }
 
     const formattedPhone = phone.replace(/\D/g, "");
@@ -279,10 +258,11 @@ router.put("/:memberId", async (req, res) => {
       return res.status(400).json({ error: "Member phone already exists for this gym" });
     }
 
-    const updatedMember = await prisma.member.update({
+    // Update basic details
+    const member = await prisma.member.update({
       where: { id: memberId },
       data: {
-        memberName: actualName,
+        memberName: name,
         phone: formattedPhone,
         email: email || null,
         address: address || null,
@@ -292,39 +272,69 @@ router.put("/:memberId", async (req, res) => {
       },
     });
 
-    const mappedMember = {
-      ...updatedMember,
-      name: updatedMember.memberName
-    };
+    // Handle memberships update
+    if (planId && startDate && endDate) {
+      // Find existing ACTIVE membership
+      const activeSub = await prisma.membership.findFirst({
+        where: { memberId, status: "ACTIVE" }
+      });
+
+      if (activeSub) {
+        await prisma.membership.update({
+          where: { id: activeSub.id },
+          data: {
+            planId,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+          }
+        });
+      } else {
+        await prisma.membership.create({
+          data: {
+            gymId: gym.id,
+            memberId,
+            planId,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            status: "ACTIVE"
+          }
+        });
+      }
+    } else if (!planId) {
+      // If "No Active Plan" was chosen, cancel active subscriptions if any exist
+      await prisma.membership.updateMany({
+        where: { memberId, status: "ACTIVE" },
+        data: { status: "CANCELLED" }
+      });
+    }
 
     await prisma.auditLog.create({
       data: {
         action: "MEMBER_UPDATE",
-        details: `Updated member ${actualName} (${formattedPhone})`,
+        details: `Updated member ${name} (${formattedPhone})`,
         gymId: gym.id,
         userId: req.user?.userId || null,
       },
     });
 
-    res.json({ success: true, member: mappedMember });
+    res.json({ success: true, member });
   } catch (err) {
-    console.error("❌ [Member PUT] Error:", err);
+    console.error("❌ [Members PUT] Error:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 /**
  * =====================================
- * DELETE MEMBER
+ * DELETE A MEMBER
  * =====================================
  */
 router.delete("/:memberId", async (req, res) => {
-  const { gymSlug, memberId } = req.params;
-
   try {
+    const { gymSlug, memberId } = req.params;
+
     const gym = await prisma.gym.findUnique({
       where: { slug: gymSlug.toLowerCase() },
-      select: { id: true }
     });
 
     if (!gym) {
@@ -346,109 +356,15 @@ router.delete("/:memberId", async (req, res) => {
     await prisma.auditLog.create({
       data: {
         action: "MEMBER_DELETE",
-        details: `Deleted member ${member.memberName} (${member.phone})`,
+        details: `Deleted member ${member.memberName || ''} (${member.phone})`,
         gymId: gym.id,
         userId: req.user?.userId || null,
       },
     });
 
-    res.json({ success: true, message: "Member deleted successfully" });
+    res.json({ success: true });
   } catch (err) {
-    console.error("❌ [Member DELETE] Error:", err);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-/**
- * =====================================
- * CREATE MEMBERSHIP (ASSIGN PLAN)
- * =====================================
- */
-router.post("/:memberId/memberships", async (req, res) => {
-  const { gymSlug, memberId } = req.params;
-  const { planId, startDate } = req.body;
-
-  if (!planId) {
-    return res.status(400).json({ error: "Membership Plan is required" });
-  }
-
-  try {
-    const gym = await prisma.gym.findUnique({
-      where: { slug: gymSlug.toLowerCase() },
-      select: { id: true, name: true }
-    });
-
-    if (!gym) {
-      return res.status(404).json({ error: "Gym not found" });
-    }
-
-    const member = await prisma.member.findUnique({
-      where: { id: memberId }
-    });
-
-    if (!member || member.gymId !== gym.id) {
-      return res.status(404).json({ error: "Member not found" });
-    }
-
-    const plan = await prisma.membershipPlan.findUnique({
-      where: { id: planId }
-    });
-
-    if (!plan || plan.gymId !== gym.id) {
-      return res.status(404).json({ error: "Membership plan not found" });
-    }
-
-    const start = startDate ? new Date(startDate) : new Date();
-    const end = new Date(start.getTime() + plan.durationDays * 24 * 60 * 60 * 1000);
-
-    // Create the membership
-    const membership = await prisma.membership.create({
-      data: {
-        gymId: gym.id,
-        memberId: member.id,
-        planId: plan.id,
-        startDate: start,
-        endDate: end,
-        status: "ACTIVE"
-      },
-      include: {
-        plan: true
-      }
-    });
-
-    // Also queue a welcome/activation template message
-    await prisma.notification.create({
-      data: {
-        gymId: gym.id,
-        memberId: member.id,
-        recipientPhone: member.phone,
-        title: `TEMPLATE:membership_active:${member.memberName},${plan.name},${end.toLocaleDateString('en-IN')}`,
-        message: `Hello ${member.memberName}, your ${plan.name} membership at ${gym.name} is now active until ${end.toLocaleDateString('en-IN')}!`,
-        type: "ACTIVATION",
-        status: "PENDING",
-      },
-    });
-
-    await prisma.auditLog.create({
-      data: {
-        action: "MEMBERSHIP_CREATE",
-        details: `Assigned plan ${plan.name} to member ${member.memberName}. Expires on ${end.toLocaleDateString('en-IN')}.`,
-        gymId: gym.id,
-        userId: req.user?.userId || null
-      }
-    });
-
-    // Send real-time socket events
-    try {
-      const io = getIO();
-      io.to(`gym:${gym.id}`).emit("inbox:update");
-    } catch (wsErr) {
-      console.error("Socket emit failed on membership create:", wsErr);
-    }
-
-    res.status(201).json({ success: true, membership });
-  } catch (err) {
-    console.error("❌ [Membership POST] Error:", err);
+    console.error("❌ [Members DELETE] Error:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

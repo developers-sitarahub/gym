@@ -63,6 +63,21 @@ router.get("/", async (req, res) => {
       return res.status(404).json({ error: "Gym not found" });
     }
 
+    // Auto-reset stuck PENDING call permissions (older than 5 minutes)
+    await prisma.member.updateMany({
+      where: {
+        gymId: gym.id,
+        callPermissionStatus: "PENDING",
+        callPermissionRequestedAt: {
+          lt: new Date(Date.now() - 5 * 60 * 1000)
+        }
+      },
+      data: {
+        callPermissionStatus: "UNKNOWN",
+        callPermissionUpdatedAt: new Date(),
+      }
+    });
+
     const members = await prisma.member.findMany({
       where: { gymId: gym.id }
     });
@@ -117,8 +132,8 @@ router.get("/", async (req, res) => {
 
         const now = new Date();
         const sessionStarted = !!lastInbound;
-        const sessionExpiresAt = lastInbound 
-          ? new Date(new Date(lastInbound.createdAt).getTime() + 24 * 60 * 60 * 1000) 
+        const sessionExpiresAt = lastInbound
+          ? new Date(new Date(lastInbound.createdAt).getTime() + 24 * 60 * 60 * 1000)
           : null;
         const sessionActive = sessionExpiresAt ? sessionExpiresAt > now : false;
 
@@ -134,18 +149,19 @@ router.get("/", async (req, res) => {
           planName: activeMembership ? activeMembership.plan.name : null,
           lastMessage: lastMessage
             ? {
-                id: lastMessage.id,
-                content: parsedText.mediaUrl ? (parsedText.mimeType?.startsWith("image/") ? "📷 Photo" : parsedText.mimeType?.startsWith("video/") ? "🎥 Video" : "📄 Document") : parsedText.content,
-                direction: lastMessage.direction.toLowerCase(),
-                status: lastMessage.status.toLowerCase(),
-                createdAt: lastMessage.createdAt
-              }
+              id: lastMessage.id,
+              content: parsedText.mediaUrl ? (parsedText.mimeType?.startsWith("image/") ? "📷 Photo" : parsedText.mimeType?.startsWith("video/") ? "🎥 Video" : "📄 Document") : parsedText.content,
+              direction: lastMessage.direction.toLowerCase(),
+              status: lastMessage.status.toLowerCase(),
+              createdAt: lastMessage.createdAt
+            }
             : null,
           lastMessageAt: lastMessage ? lastMessage.createdAt : member.updatedAt,
           unreadCount,
           sessionStarted,
           sessionActive,
-          sessionExpiresAt
+          sessionExpiresAt,
+          callPermissionStatus: member.callPermissionStatus
         };
       })
     );
@@ -179,6 +195,21 @@ router.get("/:memberId", async (req, res) => {
     if (!gym) {
       return res.status(404).json({ error: "Gym not found" });
     }
+
+    // Auto-reset stuck PENDING call permissions (older than 5 minutes)
+    await prisma.member.updateMany({
+      where: {
+        gymId: gym.id,
+        callPermissionStatus: "PENDING",
+        callPermissionRequestedAt: {
+          lt: new Date(Date.now() - 5 * 60 * 1000)
+        }
+      },
+      data: {
+        callPermissionStatus: "UNKNOWN",
+        callPermissionUpdatedAt: new Date(),
+      }
+    });
 
     const member = await prisma.member.findUnique({
       where: { id: memberId }
@@ -238,8 +269,8 @@ router.get("/:memberId", async (req, res) => {
 
     const now = new Date();
     const sessionStarted = !!lastInbound;
-    const sessionExpiresAt = lastInbound 
-      ? new Date(new Date(lastInbound.createdAt).getTime() + 24 * 60 * 60 * 1000) 
+    const sessionExpiresAt = lastInbound
+      ? new Date(new Date(lastInbound.createdAt).getTime() + 24 * 60 * 60 * 1000)
       : null;
     const sessionActive = sessionExpiresAt ? sessionExpiresAt > now : false;
 
@@ -254,7 +285,8 @@ router.get("/:memberId", async (req, res) => {
         notes: member.notes,
         blockedAt: member.blockedAt,
         isMember: !!activeMembership,
-        planName: activeMembership ? activeMembership.plan.name : null
+        planName: activeMembership ? activeMembership.plan.name : null,
+        callPermissionStatus: member.callPermissionStatus
       },
       sessionStarted,
       sessionActive,
@@ -1093,6 +1125,59 @@ router.post("/:memberId/send-template", async (req, res) => {
             console.log(`✅ [Send Template] Header media uploaded. ID: ${mediaId}`);
           }
         }
+      } else if (fileInfo && Array.isArray(fileInfo.header_handle) && fileInfo.header_handle.length > 0) {
+        const handleUrl = fileInfo.header_handle[0];
+        console.log(`🔌 [Send Template] Fetching header media from Meta CDN: ${handleUrl}`);
+        try {
+          const fetchRes = await fetch(handleUrl);
+          if (fetchRes.ok) {
+            const fileBuffer = Buffer.from(await fetchRes.arrayBuffer());
+            const mimeType = fetchRes.headers.get("content-type") || "image/jpeg";
+            const blob = new Blob([fileBuffer], { type: mimeType });
+
+            const waForm = new FormData();
+            waForm.append("messaging_product", "whatsapp");
+            waForm.append("file", blob, "header-file");
+
+            const uploadRes = await fetch(
+              `${GRAPH_BASE_URL}/${META_API_VERSION}/${gym.whatsapp_phone_number_id}/media`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${accessToken}`
+                },
+                body: waForm
+              }
+            );
+
+            if (uploadRes.ok) {
+              const uploadData = await uploadRes.json();
+              const mediaId = uploadData.id;
+              if (mediaId) {
+                const formatLower = headerComp.format.toLowerCase();
+                components.push({
+                  type: "header",
+                  parameters: [
+                    {
+                      type: formatLower,
+                      [formatLower]: {
+                        id: mediaId
+                      }
+                    }
+                  ]
+                });
+                console.log(`✅ [Send Template] Synced header media uploaded to Meta. ID: ${mediaId}`);
+              }
+            } else {
+              const errData = await uploadRes.json();
+              console.error("❌ Failed to upload template header media to Meta from CDN handle:", errData);
+            }
+          } else {
+            console.error(`❌ Failed to fetch header media from CDN handle, status: ${fetchRes.status}`);
+          }
+        } catch (fetchErr) {
+          console.error("❌ Error fetching/uploading header media from CDN handle:", fetchErr);
+        }
       }
     }
 
@@ -1203,7 +1288,7 @@ router.post("/:memberId/send-media", upload.single("file"), async (req, res) => 
 
   // Security check: Block executable/script files that could harm the platform or recipient
   const harmfulExtensions = [
-    ".exe", ".msi", ".bat", ".cmd", ".sh", ".vbs", ".js", ".scr", ".pif", ".cpl", 
+    ".exe", ".msi", ".bat", ".cmd", ".sh", ".vbs", ".js", ".scr", ".pif", ".cpl",
     ".wsf", ".jar", ".com", ".gadget", ".vb", ".vbe", ".jse", ".lnk", ".reg"
   ];
   const ext = path.extname(file.originalname || "").toLowerCase();
@@ -1273,10 +1358,10 @@ router.post("/:memberId/send-media", upload.single("file"), async (req, res) => 
     const mediaType = file.mimetype.startsWith("image/")
       ? "image"
       : file.mimetype.startsWith("video/")
-      ? "video"
-      : file.mimetype.startsWith("audio/")
-      ? "audio"
-      : "document";
+        ? "video"
+        : file.mimetype.startsWith("audio/")
+          ? "audio"
+          : "document";
 
     const sendPayload = {
       messaging_product: "whatsapp",

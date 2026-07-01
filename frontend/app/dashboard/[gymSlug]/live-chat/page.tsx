@@ -35,7 +35,7 @@ export default function LiveChatPage() {
       {gymId ? (
         <ChatTakeover gymId={gymId} gymSlug={gymSlug} />
       ) : (
-        <div className="flex h-64 items-center justify-center text-xs text-zinc-500 bg-zinc-950/40 rounded-2xl border border-zinc-900">
+        <div className="flex h-64 items-center justify-center text-xs text-zinc-500 bg-zinc-950/40 rounded-2xl border border-zinc-800">
           Loading live takeover console...
         </div>
       )}

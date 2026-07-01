@@ -193,7 +193,7 @@ export default function TemplatePicker({
                                 <div className="absolute inset-0 opacity-[0.4] dark:opacity-[0.08] bg-[url('https://camo.githubusercontent.com/857a221f7c706d8847f9723ec083b063878b2772591f463378b879a838be8194/68747470733a2f2f757365722d696d616765732e67697468756275736572636f6e74656e742e636f6d2f31353037353735392f32383731393134342d38366463306637302d373362312d346334382d393630332d3935303237396532373635382e706e67')] bg-repeat bg-size-[400px]"></div>
 
                                 <div className="relative z-10 p-4 min-h-75 flex flex-col items-start justify-center">
-                                    <div className="w-full bg-bubble-inbound-bg rounded-2xl rounded-tl-none shadow-md relative overflow-hidden border border-zinc-800/40 transition-colors duration-300">
+                                    <div className="w-full bg-bubble-inbound-bg rounded-lg rounded-tl-none shadow-md relative overflow-hidden border border-zinc-800/40 transition-colors duration-300">
                                         <div className="p-1">
                                             {/* Header Media */}
                                             {(() => {
@@ -291,7 +291,7 @@ export default function TemplatePicker({
                         {(selectedTemplate.templateType === "carousel" || (selectedTemplate.carouselCards && selectedTemplate.carouselCards.length > 0)) && (
                             <div className="flex overflow-x-auto gap-2 py-2 mt-1 snap-x scrollbar-thin scrollbar-thumb-gray-600/50">
                                 {(selectedTemplate.carouselCards || []).map((card, idx) => (
-                                    <div key={idx} className="shrink-0 w-50 bg-wa-inbound rounded-2xl overflow-hidden shadow-sm border border-border/50 snap-center flex flex-col">
+                                    <div key={idx} className="shrink-0 w-50 bg-wa-inbound rounded-lg overflow-hidden shadow-sm border border-border/50 snap-center flex flex-col">
                                         {/* Content Area */}
                                         <div className="p-3">
                                             {card.s3Url && (

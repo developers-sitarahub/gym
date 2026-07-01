@@ -48,12 +48,29 @@ export function useInboxSocket({
       }
     };
 
+    const handleMemberUpdate = (member: any) => {
+      if (!member?.id) return;
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === member.id
+            ? {
+              ...c,
+              callPermissionStatus: member.callPermissionStatus || c.callPermissionStatus,
+              isBlocked: member.blockedAt ? true : false,
+            }
+            : c
+        )
+      );
+    };
+
     socket.on("inbox:update", refreshInbox);
     socket.on("connect", refreshInbox);
+    socket.on("member:updated", handleMemberUpdate);
 
     return () => {
       socket.off("inbox:update", refreshInbox);
       socket.off("connect", refreshInbox);
+      socket.off("member:updated", handleMemberUpdate);
     };
   }, [selectedConversation, readSentRef, setConversations, mapApiConversation, gymSlug]);
 }

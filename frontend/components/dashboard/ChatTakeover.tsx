@@ -225,7 +225,7 @@ export default function ChatTakeover({ gymId, gymSlug }: ChatTakeoverProps) {
                 return (
                   <div key={msg.id} className={`flex ${isMemberIn ? 'justify-start' : 'justify-end'}`}>
                     <div
-                      className={`relative max-w-[70%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed shadow-sm ${
+                      className={`relative max-w-[70%] rounded-lg px-4 py-2.5 text-xs leading-relaxed shadow-sm ${
                         isMemberIn
                           ? 'bg-zinc-900 text-zinc-100 rounded-tl-none border border-zinc-800'
                           : isStaffSend

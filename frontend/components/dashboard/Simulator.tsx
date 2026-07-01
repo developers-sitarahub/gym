@@ -166,10 +166,10 @@ export default function Simulator({ gymId, gymSlug }: SimulatorProps) {
       {/* Simulator Configurations */}
       <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 backdrop-blur-md lg:col-span-1">
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-bold tracking-tight text-white">Simulator Sandbox</h3>
+          <h3 className="text-lg font-bold tracking-tight text-zinc-100">Simulator Sandbox</h3>
           <button
             onClick={() => fetchMessages(selectedMemberId)}
-            className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
             title="Refresh Chats"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -184,7 +184,7 @@ export default function Simulator({ gymId, gymSlug }: SimulatorProps) {
           <select
             value={selectedMemberId}
             onChange={(e) => setSelectedMemberId(e.target.value)}
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none"
+            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm text-zinc-100 focus:border-cyan-500 focus:outline-none"
           >
             {members.map((m) => (
               <option key={m.id} value={m.id}>
@@ -212,7 +212,7 @@ export default function Simulator({ gymId, gymSlug }: SimulatorProps) {
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
                 required
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-cyan-500"
               />
             </div>
             <div className="mb-4">
@@ -228,7 +228,7 @@ export default function Simulator({ gymId, gymSlug }: SimulatorProps) {
                   setNewMemberPhone((hasPlus ? '+' : '') + digits);
                 }}
                 required
-                className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
+                className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-cyan-500"
               />
             </div>
             <div className="flex gap-2">
@@ -267,19 +267,19 @@ export default function Simulator({ gymId, gymSlug }: SimulatorProps) {
       <div className="lg:col-span-2">
         <div className="mx-auto max-w-sm rounded-[36px] border-[8px] border-zinc-800 bg-zinc-950 p-3 shadow-2xl shadow-cyan-950/20">
           {/* Phone Header */}
-          <div className="relative flex items-center justify-between border-b border-zinc-900 bg-zinc-900/90 px-4 py-3 rounded-t-2xl">
+          <div className="relative flex items-center justify-between border-b border-zinc-800 bg-zinc-900/90 px-4 py-3 rounded-t-2xl">
             <div className="flex items-center gap-3">
               <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-cyan-700 font-extrabold text-white">
                 {activeMember ? activeMember.name.substring(0, 2).toUpperCase() : 'WA'}
                 <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-zinc-900" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">{activeMember ? activeMember.name : 'WhatsApp Bot'}</h4>
+                <h4 className="text-sm font-bold text-zinc-100">{activeMember ? activeMember.name : 'WhatsApp Bot'}</h4>
                 <p className="text-[10px] text-emerald-400">online</p>
               </div>
             </div>
             <div className="flex items-center gap-3 text-zinc-400">
-              <Phone className="h-4 w-4 cursor-pointer hover:text-white" />
+              <Phone className="h-4 w-4 cursor-pointer hover:text-zinc-100" />
             </div>
           </div>
 
@@ -296,7 +296,7 @@ export default function Simulator({ gymId, gymSlug }: SimulatorProps) {
                 const isInbound = msg.type === 'INBOUND';
                 return (
                   <div key={msg.id} className={`flex ${isInbound ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`relative max-w-[85%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed shadow-md ${
+                    <div className={`relative max-w-[85%] rounded-lg px-4 py-2.5 text-xs leading-relaxed shadow-md ${
                       isInbound
                         ? 'bg-emerald-600 text-white rounded-tr-none'
                         : 'bg-zinc-800 text-zinc-100 rounded-tl-none border border-zinc-700/50'
@@ -359,14 +359,14 @@ export default function Simulator({ gymId, gymSlug }: SimulatorProps) {
           </div>
 
           {/* Chat Form */}
-          <form onSubmit={handleSendMessage} className="mt-2 flex items-center gap-2 border-t border-zinc-900 bg-zinc-950 p-2 rounded-b-2xl">
+          <form onSubmit={handleSendMessage} className="mt-2 flex items-center gap-2 border-t border-zinc-800 bg-zinc-950 p-2 rounded-b-2xl">
             <input
               type="text"
               placeholder="Type a WhatsApp message..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               disabled={!selectedMemberId || isLoading}
-              className="flex-1 rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 disabled:opacity-50"
+              className="flex-1 rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs text-zinc-100 focus:outline-none focus:border-cyan-500 disabled:opacity-50"
             />
             <button
               type="submit"

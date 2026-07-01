@@ -18,12 +18,16 @@ export default function ChatHeader({
   onUpdateLeadStatus,
   onToggleBlock,
   onAddAsMember,
+  onCallClick,
+  onRequestCallPermission,
 }: {
   conversation: Conversation;
   onBack?: () => void;
   onUpdateLeadStatus?: (leadId: string, status: string) => Promise<void>;
   onToggleBlock?: () => void;
   onAddAsMember?: () => void;
+  onCallClick?: () => void;
+  onRequestCallPermission?: () => void;
 }) {
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,6 +61,8 @@ export default function ChatHeader({
       document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
+
+  const [isCooldown, setIsCooldown] = useState(false);
 
   const statusColors: Record<string, string> = {
     new: "bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30",
@@ -97,43 +103,21 @@ export default function ChatHeader({
             <h3 className="font-bold text-sm sm:text-base text-zinc-100 truncate">
               {conversation.memberName}
             </h3>
-            {conversation.isBlocked && (
-              <span className="bg-rose-500/15 text-rose-400 text-[10px] font-medium px-2.5 py-0.5 rounded-full border border-rose-500/20 flex-shrink-0 animate-pulse">
-                Blocked
+            {conversation.isMember && (
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30 hidden sm:inline-block">
+                MEMBER
               </span>
             )}
           </div>
-          <p className="text-xs text-zinc-400 truncate">
+          <p className="text-xs sm:text-sm text-zinc-400 truncate">
             {conversation.phone}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-        {/* Add as Member button */}
-        {!conversation.isMember && onAddAsMember && (
-          <button
-            onClick={onAddAsMember}
-            className="rounded-full bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold px-3.5 py-1.5 transition-colors border border-cyan-500/30 flex items-center gap-1 shadow-sm mr-1 cursor-pointer"
-          >
-            <UserCheck className="w-3.5 h-3.5" />
-            <span>Add as Member</span>
-          </button>
-        )}
-
-        {/* Active Membership Badge */}
-        {conversation.isMember && conversation.planName && (
-          <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-bold mr-1 shadow-sm select-none">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span>Active: {conversation.planName}</span>
-          </div>
-        )}
-        {/* Lead Status Dropdown */}
+      <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0 relative">
         {conversation.leadId && onUpdateLeadStatus && (
-          <div className="relative block" ref={statusRef}>
+          <div className="relative" ref={statusRef}>
             <button
               onClick={() => setIsStatusOpen(!isStatusOpen)}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${statusColors[currentStatus] || "bg-zinc-950 text-zinc-300 border-zinc-800"}`}
@@ -202,13 +186,44 @@ export default function ChatHeader({
           </div>
         )}
 
-        <motion.button className="hidden sm:flex p-2 rounded-xl hover:bg-zinc-850 text-zinc-400 hover:text-zinc-100 transition-all cursor-pointer">
-          <Video className="w-5 h-5" />
-        </motion.button>
-        <motion.button className="hidden sm:flex p-2 rounded-xl hover:bg-zinc-850 text-zinc-400 hover:text-zinc-100 transition-all cursor-pointer">
-          <Phone className="w-5 h-5" />
-        </motion.button>
-        
+        <div className="hidden sm:flex items-center gap-2">
+          <motion.button
+            onClick={conversation.callPermissionStatus === 'GRANTED' ? onCallClick : undefined}
+            disabled={conversation.callPermissionStatus !== 'GRANTED'}
+            className={`p-2 rounded-xl transition-all flex items-center justify-center ${conversation.callPermissionStatus === 'GRANTED'
+              ? "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.2)]"
+              : "text-zinc-600 bg-zinc-900 cursor-not-allowed"
+              }`}
+            title={conversation.callPermissionStatus === 'GRANTED' ? "Call" : "Customer hasn't granted calling permission."}
+          >
+            <Phone className="w-5 h-5" />
+          </motion.button>
+
+          {conversation.callPermissionStatus !== 'GRANTED' && (
+            <button
+              onClick={() => {
+                if (isCooldown) return;
+                setIsCooldown(true);
+                onRequestCallPermission?.();
+                setTimeout(() => setIsCooldown(false), 60000);
+              }}
+              disabled={isCooldown}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors border ${isCooldown
+                ? "bg-zinc-800 text-zinc-500 border-zinc-700 cursor-not-allowed"
+                : conversation.callPermissionStatus === 'DENIED' || conversation.callPermissionStatus === 'REVOKED'
+                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20"
+                  : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20"
+                }`}
+            >
+              {isCooldown
+                ? "Waiting..."
+                : conversation.callPermissionStatus === 'PENDING' || conversation.callPermissionStatus === 'DENIED' || conversation.callPermissionStatus === 'REVOKED'
+                  ? "Request Again"
+                  : "Request Permission"}
+            </button>
+          )}
+        </div>
+
         {onToggleBlock && (
           <div className="relative" ref={menuRef}>
             <motion.button
@@ -225,11 +240,10 @@ export default function ChatHeader({
                     setIsMenuOpen(false);
                     onToggleBlock();
                   }}
-                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-900 transition-colors flex items-center gap-2.5 cursor-pointer ${
-                    conversation.isBlocked
-                      ? "text-green-400"
-                      : "text-rose-500"
-                  }`}
+                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-900 transition-colors flex items-center gap-2.5 cursor-pointer ${conversation.isBlocked
+                    ? "text-green-400"
+                    : "text-rose-500"
+                    }`}
                 >
                   {conversation.isBlocked ? (
                     <>

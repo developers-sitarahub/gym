@@ -22,10 +22,15 @@ interface MemberData {
   isBotDisabled: boolean;
   memberships: Array<{
     id: string;
-    status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
+    planId: string;
+    startDate: string;
     endDate: string;
+    status: 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
     plan: {
+      id: string;
       name: string;
+      price: number;
+      durationDays: number;
     };
   }>;
 }
@@ -62,6 +67,17 @@ export default function MembersPage() {
   const [emergencyContact, setEmergencyContact] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Plans & Subscription Fields
+  const [plans, setPlans] = useState<any[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  const getTodayString = () => {
+    const local = new Date();
+    return local.toISOString().split('T')[0];
+  };
+
   const fetchMembers = async () => {
     setIsLoading(true);
     try {
@@ -77,9 +93,47 @@ export default function MembersPage() {
     }
   };
 
+  const fetchPlans = async () => {
+    try {
+      const res = await fetch(`/api/dashboard/${gymSlug}/plans`);
+      if (res.ok) {
+        const data = await res.json();
+        setPlans(data.plans || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchMembers();
+    fetchPlans();
   }, [gymSlug]);
+
+  const handlePlanChange = (planId: string) => {
+    setSelectedPlanId(planId);
+    if (!planId) {
+      setEndDate('');
+      return;
+    }
+    const selectedPlan = plans.find(p => p.id === planId);
+    if (selectedPlan) {
+      const start = startDate ? new Date(startDate) : new Date();
+      const end = new Date(start.getTime() + selectedPlan.durationDays * 24 * 60 * 60 * 1000);
+      setEndDate(end.toISOString().split('T')[0]);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedPlanId && startDate) {
+      const selectedPlan = plans.find(p => p.id === selectedPlanId);
+      if (selectedPlan) {
+        const start = new Date(startDate);
+        const end = new Date(start.getTime() + selectedPlan.durationDays * 24 * 60 * 60 * 1000);
+        setEndDate(end.toISOString().split('T')[0]);
+      }
+    }
+  }, [startDate, selectedPlanId, plans]);
 
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,6 +157,9 @@ export default function MembersPage() {
           dob: dob || undefined,
           emergencyContact,
           notes,
+          planId: selectedPlanId || undefined,
+          startDate: selectedPlanId ? startDate : undefined,
+          endDate: selectedPlanId ? endDate : undefined,
         }),
       });
 
@@ -118,6 +175,9 @@ export default function MembersPage() {
         setDob('');
         setEmergencyContact('');
         setNotes('');
+        setSelectedPlanId('');
+        setStartDate('');
+        setEndDate('');
         
         await fetchMembers();
       } else {
@@ -129,6 +189,21 @@ export default function MembersPage() {
     }
   };
 
+  const openAddModal = () => {
+    setName('');
+    setPhone('');
+    setEmail('');
+    setAddress('');
+    setDob('');
+    setEmergencyContact('');
+    setNotes('');
+    setSelectedPlanId('');
+    setStartDate(getTodayString());
+    setEndDate('');
+    setError('');
+    setIsAdding(true);
+  };
+
   const openEditModal = (member: MemberData) => {
     setEditingMember(member);
     setName(member.name || '');
@@ -138,6 +213,19 @@ export default function MembersPage() {
     setDob(member.dob ? new Date(member.dob).toISOString().split('T')[0] : '');
     setEmergencyContact(member.emergencyContact || '');
     setNotes(member.notes || '');
+
+    // Populate plan details
+    const activeSub = member.memberships?.find(s => s.status === 'ACTIVE') || member.memberships?.[0];
+    if (activeSub) {
+      setSelectedPlanId(activeSub.planId || activeSub.plan.id);
+      setStartDate(activeSub.startDate ? new Date(activeSub.startDate).toISOString().split('T')[0] : getTodayString());
+      setEndDate(activeSub.endDate ? new Date(activeSub.endDate).toISOString().split('T')[0] : '');
+    } else {
+      setSelectedPlanId('');
+      setStartDate(getTodayString());
+      setEndDate('');
+    }
+
     setError('');
   };
 
@@ -164,6 +252,9 @@ export default function MembersPage() {
           dob: dob || undefined,
           emergencyContact,
           notes,
+          planId: selectedPlanId || null,
+          startDate: selectedPlanId ? startDate : null,
+          endDate: selectedPlanId ? endDate : null,
         }),
       });
 
@@ -179,6 +270,9 @@ export default function MembersPage() {
         setDob('');
         setEmergencyContact('');
         setNotes('');
+        setSelectedPlanId('');
+        setStartDate('');
+        setEndDate('');
         
         await fetchMembers();
       } else {
@@ -225,11 +319,11 @@ export default function MembersPage() {
       {/* Header section */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Members Directory</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-zinc-100 sm:text-3xl">Members Directory</h2>
           <p className="text-xs text-zinc-500 mt-1">Manage member profiles, contact logs, and subscriptions.</p>
         </div>
         <button
-          onClick={() => setIsAdding(true)}
+          onClick={openAddModal}
           className="flex items-center justify-center gap-1.5 rounded-xl bg-cyan-600 px-4 py-2.5 text-xs font-bold text-white transition-all hover:bg-cyan-500"
         >
           <UserPlus className="h-4 w-4" /> Add New Member
@@ -249,7 +343,7 @@ export default function MembersPage() {
               placeholder="Search by name, phone or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 py-2.5 pl-10 pr-4 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 py-2.5 pl-10 pr-4 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
             />
           </div>
 
@@ -261,7 +355,7 @@ export default function MembersPage() {
             ) : (
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-zinc-900 text-zinc-400 font-bold uppercase tracking-wider">
+                  <tr className="border-b border-zinc-800 text-zinc-400 font-bold uppercase tracking-wider">
                     <th className="py-3 px-4">Name</th>
                     <th className="py-3 px-4">Phone / WhatsApp</th>
                     <th className="py-3 px-4">Email</th>
@@ -275,12 +369,12 @@ export default function MembersPage() {
                     <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-900/60">
+                <tbody className="divide-y divide-zinc-800/60">
                   {filteredMembers.map((m) => {
                     const activeSub = m.memberships.find((s) => s.status === 'ACTIVE');
                     return (
                       <tr key={m.id} className="hover:bg-zinc-900/30 transition-all">
-                        <td className="py-3.5 px-4 font-bold text-white">{m.name}</td>
+                        <td className="py-3.5 px-4 font-bold text-zinc-100">{m.name}</td>
                         <td className="py-3.5 px-4 text-zinc-300 font-mono">{m.phone}</td>
                         <td className="py-3.5 px-4 text-zinc-300">{m.email || '--'}</td>
                         <td className="py-3.5 px-4 text-zinc-300">
@@ -322,7 +416,7 @@ export default function MembersPage() {
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => setViewingMember(m)}
-                              className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all"
+                              className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-all"
                               title="View Details"
                             >
                               <Eye className="h-4 w-4" />
@@ -363,7 +457,7 @@ export default function MembersPage() {
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md rounded-2xl border border-cyan-800 bg-zinc-950 p-6 shadow-2xl space-y-4"
           >
-            <h3 className="text-lg font-bold text-white mb-2">Add Member Profile</h3>
+            <h3 className="text-lg font-bold text-zinc-100 mb-2">Add Member Profile</h3>
             
             {error && (
               <div className="mb-4 rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs font-semibold text-rose-400">
@@ -380,7 +474,7 @@ export default function MembersPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -398,7 +492,7 @@ export default function MembersPage() {
                     setPhone((hasPlus ? '+' : '') + digits);
                   }}
                   required
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -409,7 +503,7 @@ export default function MembersPage() {
                   placeholder="john@doe.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -420,7 +514,7 @@ export default function MembersPage() {
                     type="date"
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
 
@@ -431,7 +525,7 @@ export default function MembersPage() {
                     placeholder="Relation & Phone"
                     value={emergencyContact}
                     onChange={(e) => setEmergencyContact(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
               </div>
@@ -443,7 +537,7 @@ export default function MembersPage() {
                   placeholder="Street and Area details"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -454,8 +548,55 @@ export default function MembersPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
+              </div>
+
+              {/* Membership Plan Section */}
+              <div className="border-t border-zinc-800/80 pt-4 mt-2">
+                <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-3">Membership Plan</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-2 block font-semibold text-zinc-400 uppercase tracking-wider">Select Plan</label>
+                    <select
+                      value={selectedPlanId}
+                      onChange={(e) => handlePlanChange(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-cyan-500"
+                    >
+                      <option value="">No Active Plan</option>
+                      {plans.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} - ₹{p.price} ({p.durationDays} Days)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedPlanId && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="mb-2 block font-semibold text-zinc-400 uppercase tracking-wider">Start Date</label>
+                        <input
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          required
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-cyan-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block font-semibold text-zinc-400 uppercase tracking-wider">End Date</label>
+                        <input
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          required
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-cyan-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -487,11 +628,11 @@ export default function MembersPage() {
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl space-y-4"
           >
-            <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
-              <h3 className="text-lg font-bold text-white">Member Profile Details</h3>
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <h3 className="text-lg font-bold text-zinc-100">Member Profile Details</h3>
               <button
                 onClick={() => setViewingMember(null)}
-                className="text-zinc-400 hover:text-white text-xs font-semibold"
+                className="text-zinc-400 hover:text-zinc-100 text-xs font-semibold"
               >
                 Close
               </button>
@@ -500,33 +641,33 @@ export default function MembersPage() {
             <div className="space-y-3.5 text-xs text-zinc-300">
               <div className="grid grid-cols-3 gap-2">
                 <span className="font-semibold text-zinc-500 uppercase tracking-wider">Full Name:</span>
-                <span className="col-span-2 text-white font-bold">{viewingMember.name}</span>
+                <span className="col-span-2 text-zinc-100 font-bold">{viewingMember.name}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <span className="font-semibold text-zinc-500 uppercase tracking-wider">WhatsApp:</span>
-                <span className="col-span-2 text-white font-mono">{viewingMember.phone}</span>
+                <span className="col-span-2 text-zinc-100 font-mono">{viewingMember.phone}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <span className="font-semibold text-zinc-500 uppercase tracking-wider">Email:</span>
-                <span className="col-span-2 text-white">{viewingMember.email || '--'}</span>
+                <span className="col-span-2 text-zinc-100">{viewingMember.email || '--'}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <span className="font-semibold text-zinc-500 uppercase tracking-wider">Date of Birth:</span>
-                <span className="col-span-2 text-white">
+                <span className="col-span-2 text-zinc-100">
                   {viewingMember.dob ? new Date(viewingMember.dob).toLocaleDateString('en-IN') : '--'}
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <span className="font-semibold text-zinc-500 uppercase tracking-wider">Emergency Contact:</span>
-                <span className="col-span-2 text-white">{viewingMember.emergencyContact || '--'}</span>
+                <span className="col-span-2 text-zinc-100">{viewingMember.emergencyContact || '--'}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <span className="font-semibold text-zinc-500 uppercase tracking-wider">Address:</span>
-                <span className="col-span-2 text-white">{viewingMember.address || '--'}</span>
+                <span className="col-span-2 text-zinc-100">{viewingMember.address || '--'}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <span className="font-semibold text-zinc-500 uppercase tracking-wider">Medical Notes:</span>
-                <span className="col-span-2 text-white whitespace-pre-wrap">{viewingMember.notes || '--'}</span>
+                <span className="col-span-2 text-zinc-100 whitespace-pre-wrap">{viewingMember.notes || '--'}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <span className="font-semibold text-zinc-500 uppercase tracking-wider">Bot Control:</span>
@@ -565,7 +706,7 @@ export default function MembersPage() {
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md rounded-2xl border border-cyan-800 bg-zinc-950 p-6 shadow-2xl space-y-4"
           >
-            <h3 className="text-lg font-bold text-white mb-2">Edit Member Profile</h3>
+            <h3 className="text-lg font-bold text-zinc-100 mb-2">Edit Member Profile</h3>
             
             {error && (
               <div className="mb-4 rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs font-semibold text-rose-400">
@@ -582,7 +723,7 @@ export default function MembersPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-650 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -600,7 +741,7 @@ export default function MembersPage() {
                     setPhone((hasPlus ? '+' : '') + digits);
                   }}
                   required
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -611,7 +752,7 @@ export default function MembersPage() {
                   placeholder="john@doe.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -622,7 +763,7 @@ export default function MembersPage() {
                     type="date"
                     value={dob}
                     onChange={(e) => setDob(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
 
@@ -633,7 +774,7 @@ export default function MembersPage() {
                     placeholder="Relation & Phone"
                     value={emergencyContact}
                     onChange={(e) => setEmergencyContact(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
               </div>
@@ -645,7 +786,7 @@ export default function MembersPage() {
                   placeholder="Street and Area details"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -656,8 +797,55 @@ export default function MembersPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500"
                 />
+              </div>
+
+              {/* Membership Plan Section */}
+              <div className="border-t border-zinc-800/80 pt-4 mt-2">
+                <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-3">Membership Plan</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="mb-2 block font-semibold text-zinc-400 uppercase tracking-wider">Select Plan</label>
+                    <select
+                      value={selectedPlanId}
+                      onChange={(e) => handlePlanChange(e.target.value)}
+                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-cyan-500"
+                    >
+                      <option value="">No Active Plan</option>
+                      {plans.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} - ₹{p.price} ({p.durationDays} Days)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedPlanId && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="mb-2 block font-semibold text-zinc-400 uppercase tracking-wider">Start Date</label>
+                        <input
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          required
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-cyan-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block font-semibold text-zinc-400 uppercase tracking-wider">End Date</label>
+                        <input
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          required
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-zinc-100 focus:outline-none focus:border-cyan-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">

@@ -155,7 +155,7 @@ export default function PaymentsPage() {
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">Payments Portal</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight text-zinc-100 sm:text-3xl">Payments Portal</h2>
           <p className="text-xs text-zinc-500 mt-1">Approve manual UPI references, view invoices, and track payment pipelines.</p>
         </div>
         <div className="flex gap-2">
@@ -272,7 +272,7 @@ export default function PaymentsPage() {
 
       {/* Manual UPI Approvals Panel */}
       <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 backdrop-blur-md">
-        <h3 className="mb-4 text-sm font-bold tracking-tight text-white uppercase tracking-wider flex items-center gap-2">
+        <h3 className="mb-4 text-sm font-bold tracking-tight text-zinc-100 uppercase tracking-wider flex items-center gap-2">
           Awaiting Verification
           {awaitingTxns.length > 0 && (
             <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[9px] font-bold text-violet-400 border border-violet-500/30 animate-pulse">
@@ -292,7 +292,7 @@ export default function PaymentsPage() {
               <div key={txn.id} className="relative rounded-xl border border-zinc-800 bg-zinc-900/40 p-5 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="block text-xs font-bold text-white">{txn.member.name}</span>
+                    <span className="block text-xs font-bold text-zinc-100">{txn.member.name}</span>
                     <span className="block text-[10px] text-zinc-500 mt-0.5">{txn.member.phone}</span>
                   </div>
                   <span className="text-base font-extrabold text-cyan-400">₹{txn.amount}</span>
@@ -322,7 +322,7 @@ export default function PaymentsPage() {
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                       required
-                      className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-[11px] text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-[11px] text-zinc-100 focus:outline-none focus:border-cyan-500"
                     />
                     <div className="flex gap-2">
                       <button
@@ -370,7 +370,7 @@ export default function PaymentsPage() {
 
       {/* Transaction History / General Pipeline Logs */}
       <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 backdrop-blur-md space-y-4">
-        <h3 className="text-sm font-bold tracking-tight text-white uppercase tracking-wider">Transaction Ledger</h3>
+        <h3 className="text-sm font-bold tracking-tight text-zinc-100 uppercase tracking-wider">Transaction Ledger</h3>
         
         <div className="overflow-x-auto">
           {isLoading ? (
@@ -380,7 +380,7 @@ export default function PaymentsPage() {
           ) : (
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-zinc-900 text-zinc-400 font-bold uppercase tracking-wider">
+                <tr className="border-b border-zinc-800 text-zinc-400 font-bold uppercase tracking-wider">
                   <th className="py-3 px-4">Member Name</th>
                   <th className="py-3 px-4">Amount</th>
                   <th className="py-3 px-4">Plan Description</th>
@@ -390,10 +390,10 @@ export default function PaymentsPage() {
                   <th className="py-3 px-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-900/60">
+              <tbody className="divide-y divide-zinc-800/60">
                 {otherTxns.map((t) => (
                   <tr key={t.id} className="hover:bg-zinc-900/30 transition-all">
-                    <td className="py-3.5 px-4 font-bold text-white">
+                    <td className="py-3.5 px-4 font-bold text-zinc-100">
                       <div>{t.member.name}</div>
                       <div className="text-[10px] text-zinc-500 font-semibold mt-0.5">{t.member.phone}</div>
                     </td>

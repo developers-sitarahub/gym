@@ -102,6 +102,11 @@ export interface Conversation {
   sessionExpiresAt?: string | null;
   templateRequired?: boolean;
   isBlocked?: boolean;
+
+  // Call permissions
+  callPermissionStatus?: "UNKNOWN" | "PENDING" | "GRANTED" | "DENIED" | "REVOKED";
+  callPermissionUpdatedAt?: string | null;
+  callPermissionVerifiedAt?: string | null;
 }
 
 export interface Message {

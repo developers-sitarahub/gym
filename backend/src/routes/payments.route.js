@@ -1,12 +1,16 @@
 import { Router } from "express";
 import prisma from "../prisma.js";
+<<<<<<< HEAD
 import { decrypt } from "../utils/encryption.js";
 import { getIO } from "../socket.js";
 import { processCompletedPayment } from "../utils/chatbotHelper.js";
+=======
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
 
 const router = Router({ mergeParams: true });
 
 /**
+<<<<<<< HEAD
  * Helper to dispatch live WhatsApp message via Meta API
  */
 async function sendWhatsAppMessage(gym, recipientPhone, messageText) {
@@ -92,13 +96,23 @@ async function sendWhatsAppMessage(gym, recipientPhone, messageText) {
 }
 
 // GET /api/dashboard/:gymSlug/payments
+=======
+ * =====================================
+ * GET ALL TRANSACTIONS
+ * =====================================
+ */
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
 router.get("/", async (req, res) => {
   const { gymSlug } = req.params;
 
   try {
     const gym = await prisma.gym.findUnique({
       where: { slug: gymSlug.toLowerCase() },
+<<<<<<< HEAD
       select: { id: true },
+=======
+      select: { id: true }
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
     });
 
     if (!gym) {
@@ -110,13 +124,20 @@ router.get("/", async (req, res) => {
       include: {
         member: {
           select: {
+<<<<<<< HEAD
             memberName: true,
             phone: true,
           },
+=======
+            name: true,
+            phone: true
+          }
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
         },
         plan: {
           select: {
             name: true,
+<<<<<<< HEAD
             durationDays: true,
           },
         },
@@ -139,13 +160,36 @@ router.get("/", async (req, res) => {
     }));
 
     res.json({ transactions: mappedTransactions });
+=======
+            durationDays: true
+          }
+        },
+        invoice: {
+          select: {
+            invoiceNumber: true
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    res.json({ transactions });
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
   } catch (err) {
     console.error("❌ [Payments GET] Error:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+<<<<<<< HEAD
 // POST /api/dashboard/:gymSlug/payments
+=======
+/**
+ * =====================================
+ * PROCESS PAYMENT ACTION (APPROVE / REJECT)
+ * =====================================
+ */
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
 router.post("/", async (req, res) => {
   const { gymSlug } = req.params;
   const { transactionId, action, reason } = req.body;
@@ -157,6 +201,10 @@ router.post("/", async (req, res) => {
   try {
     const gym = await prisma.gym.findUnique({
       where: { slug: gymSlug.toLowerCase() },
+<<<<<<< HEAD
+=======
+      select: { id: true }
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
     });
 
     if (!gym) {
@@ -165,14 +213,22 @@ router.post("/", async (req, res) => {
 
     const transaction = await prisma.transaction.findUnique({
       where: { id: transactionId },
+<<<<<<< HEAD
       include: { member: true, plan: true },
     });
 
     if (!transaction || transaction.gymId !== gym.id) {
+=======
+      include: { plan: true }
+    });
+
+    if (!transaction) {
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
       return res.status(404).json({ error: "Transaction not found" });
     }
 
     if (action === "APPROVE") {
+<<<<<<< HEAD
       if (transaction.status === "PAID") {
         return res.status(400).json({ error: "Transaction is already paid" });
       }
@@ -244,6 +300,76 @@ router.post("/", async (req, res) => {
       return res.json({ success: true, transaction: updated });
     } else {
       return res.status(400).json({ error: "Invalid action. Must be APPROVE or REJECT" });
+=======
+      // 1. Update transaction status
+      const updatedTxn = await prisma.transaction.update({
+        where: { id: transactionId },
+        data: { status: "PAID" }
+      });
+
+      // 2. Create active membership
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(startDate.getDate() + transaction.plan.durationDays);
+
+      await prisma.membership.create({
+        data: {
+          memberId: transaction.memberId,
+          planId: transaction.planId,
+          startDate,
+          endDate,
+          status: "ACTIVE",
+          gymId: gym.id
+        }
+      });
+
+      // 3. Create invoice
+      const invoiceNumber = `INV-${Date.now()}`;
+      await prisma.invoice.create({
+        data: {
+          invoiceNumber,
+          dueDate: endDate,
+          amount: transaction.amount,
+          totalAmount: transaction.amount,
+          transactionId: transaction.id,
+          gymId: gym.id
+        }
+      });
+
+      // 4. Create Audit Log
+      await prisma.auditLog.create({
+        data: {
+          action: "PAYMENT_APPROVE",
+          details: `Approved transaction ${transactionId} for amount ₹${transaction.amount}. Active membership created.`,
+          gymId: gym.id,
+          userId: req.user?.userId || null
+        }
+      });
+
+      return res.json({ success: true, transaction: updatedTxn });
+    } else if (action === "REJECT") {
+      const updatedTxn = await prisma.transaction.update({
+        where: { id: transactionId },
+        data: { 
+          status: "REJECTED",
+          paymentDetails: reason ? { rejectReason: reason } : undefined
+        }
+      });
+
+      // Create Audit Log
+      await prisma.auditLog.create({
+        data: {
+          action: "PAYMENT_REJECT",
+          details: `Rejected transaction ${transactionId}. Reason: ${reason || "No reason given"}`,
+          gymId: gym.id,
+          userId: req.user?.userId || null
+        }
+      });
+
+      return res.json({ success: true, transaction: updatedTxn });
+    } else {
+      return res.status(400).json({ error: "Invalid action. Use APPROVE or REJECT." });
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
     }
   } catch (err) {
     console.error("❌ [Payments POST] Error:", err);
@@ -251,6 +377,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // GET /api/dashboard/:gymSlug/payments/settings
 router.get("/settings", async (req, res) => {
   const { gymSlug } = req.params;
@@ -332,4 +459,6 @@ router.post("/settings", async (req, res) => {
   }
 });
 
+=======
+>>>>>>> 8e2366b7e9d6ff50559722759d845390cfa9e42a
 export default router;

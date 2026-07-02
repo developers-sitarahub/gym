@@ -1,6 +1,8 @@
 import { Router } from "express";
 import prisma from "../prisma.js";
 import { getIO } from "../socket.js";
+import { handleChatbotMessage } from "../utils/chatbotHelper.js";
+import { decrypt } from "../utils/encryption.js";
 
 const router = Router();
 
@@ -48,6 +50,14 @@ router.post("/", async (req, res) => {
     const entry = body.entry?.[0];
     const change = entry?.changes?.[0];
     const value = change?.value;
+    const field = change?.field;
+
+    // Silently ignore other Meta webhook fields (like flows health alerts, template state updates, etc.)
+    if (field && field !== "messages") {
+      return;
+    }
+
+    console.log("📥 Received Webhook Event Raw Body:", JSON.stringify(body, null, 2));
 
     if (!value) {
       console.log("ℹ️ Webhook payload ignored (no 'value' object found).");

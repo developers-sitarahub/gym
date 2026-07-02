@@ -23,7 +23,7 @@ export default function Navbar() {
     { label: 'Features', href: '/#features' },
     { label: 'How It Works', href: '/#how-it-works' },
     { label: 'Demo', href: '/#demo' },
-    { label: 'About', href: '/about' },
+    { label: 'About', href: '/#journey' },
     { label: 'Pricing', href: '/#pricing' },
     { label: 'FAQ', href: '/#faq' },
   ];
@@ -48,22 +48,14 @@ export default function Navbar() {
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-500">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href || (pathname === '/' && link.href === '/#features' && false); // exact routing visual indication if needed
-            const isAboutActive = pathname === '/about' && link.href === '/about';
             return (
               <Link
                 key={link.label}
                 href={link.href}
-                className={`transition-colors relative group ${
-                  isAboutActive ? 'text-indigo-600' : 'hover:text-indigo-600'
-                }`}
+                className="transition-colors relative group hover:text-indigo-600"
               >
                 {link.label}
-                <span
-                  className={`absolute -bottom-1 left-0 h-0.5 bg-indigo-600 rounded-full transition-all duration-300 ${
-                    isAboutActive ? 'w-full' : 'w-0 group-hover:w-full'
-                  }`}
-                />
+                <span className="absolute -bottom-1 left-0 h-0.5 bg-indigo-600 rounded-full transition-all duration-300 w-0 group-hover:w-full" />
               </Link>
             );
           })}
@@ -103,17 +95,12 @@ export default function Navbar() {
           >
             <nav className="flex flex-col gap-1 p-4 text-sm font-semibold text-slate-600">
               {navLinks.map((link) => {
-                const isAboutActive = pathname === '/about' && link.href === '/about';
                 return (
                   <Link
                     key={link.label}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`py-3 px-4 rounded-xl transition-all ${
-                      isAboutActive
-                        ? 'bg-indigo-50 text-indigo-600 font-bold'
-                        : 'hover:bg-indigo-50/50 hover:text-indigo-600'
-                    }`}
+                    className="py-3 px-4 rounded-xl transition-all hover:bg-indigo-50/50 hover:text-indigo-600"
                   >
                     {link.label}
                   </Link>
